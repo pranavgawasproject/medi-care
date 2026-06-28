@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { supabase } from './supabaseClient';
 import { 
   Activity, 
   Calendar, 
@@ -17,41 +18,18 @@ import {
 } from 'lucide-react';
 import './App.css';
 
-// Initial Mock Data matching our Mongoose Schemas
-const initialDoctors = [
-  { id: 'doc-1', FullName: 'Dr. Sarah Jenkins', specialization: 'Cardiology', location: 'Building A, Room 104', max_patients_per_day: '12' },
-  { id: 'doc-2', FullName: 'Dr. David Miller', specialization: 'Pediatrics', location: 'Building B, Room 205', max_patients_per_day: '15' },
-  { id: 'doc-3', FullName: 'Dr. Elena Rostova', specialization: 'Neurology', location: 'Building A, Room 302', max_patients_per_day: '8' }
-];
-
-const initialPatients = [
-  { id: 'pat-1', name: 'Pranav Gawas', email: 'pranavgawas1999@gmail.com', phone: '+91 9876543210', medical_history: 'Hypertension under control, regular checkups' },
-  { id: 'pat-2', name: 'Emily Watson', email: 'emily@example.com', phone: '+1 555 382 9102', medical_history: 'None' },
-  { id: 'pat-3', name: 'Michael Chang', email: 'm.chang@example.com', phone: '+1 555 491 3022', medical_history: 'Asthma history' }
-];
-
-const initialAppointments = [
-  { id: 'app-1', patient_id: 'pat-1', doctor_id: 'doc-1', appointment_date: '2026-06-26', appointment_time: '10:00 AM', status: 'confirmed' },
-  { id: 'app-2', patient_id: 'pat-2', doctor_id: 'doc-2', appointment_date: '2026-06-26', appointment_time: '11:30 AM', status: 'pending' },
-  { id: 'app-3', patient_id: 'pat-3', doctor_id: 'doc-1', appointment_date: '2026-06-27', appointment_time: '02:00 PM', status: 'pending' }
-];
-
-const initialSchedules = [
-  { id: 'sch-1', doctor_id: 'doc-1', day_of_week: 'Monday', start_time: '09:00 AM', end_time: '04:00 PM', available_slots: 10 },
-  { id: 'sch-2', doctor_id: 'doc-1', day_of_week: 'Wednesday', start_time: '09:00 AM', end_time: '04:00 PM', available_slots: 8 },
-  { id: 'sch-3', doctor_id: 'doc-2', day_of_week: 'Tuesday', start_time: '10:00 AM', end_time: '05:00 PM', available_slots: 12 },
-  { id: 'sch-4', doctor_id: 'doc-3', day_of_week: 'Thursday', start_time: '08:00 AM', end_time: '01:00 PM', available_slots: 6 }
-];
+const ACTING_DOCTOR_ID = 'c7a7b8e1-512c-473d-9cb1-e8dfd6a5a411'; // Dr. Sarah Jenkins
+const ACTING_PATIENT_ID = 'b1e7c8a1-512c-473d-9cb1-e8dfd6a5a411'; // Pranav Gawas
 
 function App() {
   const [role, setRole] = useState('patient'); // 'patient' | 'doctor' | 'admin'
-  const [doctors, setDoctors] = useState(initialDoctors);
-  const [patients, setPatients] = useState(initialPatients);
-  const [appointments, setAppointments] = useState(initialAppointments);
-  const [schedules, setSchedules] = useState(initialSchedules);
+  const [doctors, setDoctors] = useState([]);
+  const [patients, setPatients] = useState([]);
+  const [appointments, setAppointments] = useState([]);
+  const [schedules, setSchedules] = useState([]);
 
   // Form State for Booking
-  const [selectedDoctorId, setSelectedDoctorId] = useState(initialDoctors[0].id);
+  const [selectedDoctorId, setSelectedDoctorId] = useState('');
   const [bookingDate, setBookingDate] = useState('2026-06-26');
   const [bookingTime, setBookingTime] = useState('10:00 AM');
   
@@ -61,46 +39,139 @@ function App() {
   const [newDocLocation, setNewDocLocation] = useState('');
   const [newDocCapacity, setNewDocCapacity] = useState('10');
 
+  // Fetch all data from Supabase
+  const fetchDoctors = async () => {
+    try {
+      const { data, error } = await supabase.from('doctors').select('*');
+      if (error) throw error;
+      if (data) {
+        const mapped = data.map(d => ({
+          id: d.id,
+          FullName: d.full_name,
+          specialization: d.specialization,
+          location: d.location,
+          max_patients_per_day: d.max_patients_per_day
+        }));
+        setDoctors(mapped);
+        if (mapped.length > 0 && !selectedDoctorId) {
+          setSelectedDoctorId(mapped[0].id);
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching doctors:', err);
+    }
+  };
+
+  const fetchPatients = async () => {
+    try {
+      const { data, error } = await supabase.from('patients').select('*');
+      if (error) throw error;
+      if (data) setPatients(data);
+    } catch (err) {
+      console.error('Error fetching patients:', err);
+    }
+  };
+
+  const fetchAppointments = async () => {
+    try {
+      const { data, error } = await supabase.from('appointments').select('*').order('appointment_date', { ascending: false });
+      if (error) throw error;
+      if (data) setAppointments(data);
+    } catch (err) {
+      console.error('Error fetching appointments:', err);
+    }
+  };
+
+  const fetchSchedules = async () => {
+    try {
+      const { data, error } = await supabase.from('schedules').select('*');
+      if (error) throw error;
+      if (data) setSchedules(data);
+    } catch (err) {
+      console.error('Error fetching schedules:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchDoctors();
+    fetchPatients();
+    fetchAppointments();
+    fetchSchedules();
+  }, []);
+
+  // Set default selected doctor once doctors are loaded
+  useEffect(() => {
+    if (doctors.length > 0 && !selectedDoctorId) {
+      setSelectedDoctorId(doctors[0].id);
+    }
+  }, [doctors, selectedDoctorId]);
+
   // Book Appointment Action
-  const handleBookAppointment = (e) => {
+  const handleBookAppointment = async (e) => {
     e.preventDefault();
+    if (!selectedDoctorId) {
+      alert('Please select a doctor.');
+      return;
+    }
     const newAppointment = {
-      id: `app-${Date.now()}`,
-      patient_id: 'pat-1', // Default acting as Pranav Gawas
+      patient_id: ACTING_PATIENT_ID, // Default acting as Pranav Gawas
       doctor_id: selectedDoctorId,
       appointment_date: bookingDate,
       appointment_time: bookingTime,
       status: 'pending'
     };
-    setAppointments([newAppointment, ...appointments]);
-    alert('Appointment requested successfully!');
+
+    try {
+      const { error } = await supabase.from('appointments').insert([newAppointment]);
+      if (error) throw error;
+      await fetchAppointments();
+      alert('Appointment requested successfully!');
+    } catch (err) {
+      console.error('Error booking appointment:', err);
+      alert('Failed to book appointment: ' + err.message);
+    }
   };
 
   // Add New Doctor Action
-  const handleAddDoctor = (e) => {
+  const handleAddDoctor = async (e) => {
     e.preventDefault();
     if (!newDocName || !newDocLocation) {
       alert('Please fill out all fields.');
       return;
     }
     const newDoc = {
-      id: `doc-${Date.now()}`,
-      FullName: newDocName,
+      full_name: newDocName,
       specialization: newDocSpecialty,
       location: newDocLocation,
-      max_patients_per_day: newDocCapacity
+      max_patients_per_day: parseInt(newDocCapacity, 10)
     };
-    setDoctors([...doctors, newDoc]);
-    setNewDocName('');
-    setNewDocLocation('');
-    alert(`Added ${newDocName} to the directory!`);
+
+    try {
+      const { error } = await supabase.from('doctors').insert([newDoc]);
+      if (error) throw error;
+      await fetchDoctors();
+      setNewDocName('');
+      setNewDocLocation('');
+      alert(`Added ${newDocName} to the directory!`);
+    } catch (err) {
+      console.error('Error adding doctor:', err);
+      alert('Failed to add doctor: ' + err.message);
+    }
   };
 
   // Update Appointment Status Action
-  const updateAppointmentStatus = (id, newStatus) => {
-    setAppointments(appointments.map(app => 
-      app.id === id ? { ...app, status: newStatus } : app
-    ));
+  const updateAppointmentStatus = async (id, newStatus) => {
+    try {
+      const { error } = await supabase
+        .from('appointments')
+        .update({ status: newStatus })
+        .eq('id', id);
+      if (error) throw error;
+      await fetchAppointments();
+    } catch (err) {
+      console.error('Error updating appointment status:', err);
+      alert('Failed to update status: ' + err.message);
+    }
   };
 
   // Helpers to resolve names
@@ -194,7 +265,7 @@ function App() {
                   <div>
                     <h3 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Upcoming Booking</h3>
                     <p style={{ fontSize: '1.15rem', fontWeight: 600 }}>
-                      {appointments.find(a => a.patient_id === 'pat-1' && a.status === 'confirmed')?.appointment_date || 'No confirmed bookings'}
+                      {appointments.find(a => a.patient_id === ACTING_PATIENT_ID && a.status === 'confirmed')?.appointment_date || 'No confirmed bookings'}
                     </p>
                   </div>
                 </div>
@@ -294,7 +365,7 @@ function App() {
                         </tr>
                       </thead>
                       <tbody>
-                        {appointments.filter(a => a.patient_id === 'pat-1').map(app => (
+                        {appointments.filter(a => a.patient_id === ACTING_PATIENT_ID).map(app => (
                           <tr key={app.id}>
                             <td style={{ fontWeight: 600 }}>{getDoctorName(app.doctor_id)}</td>
                             <td>
@@ -349,7 +420,7 @@ function App() {
                   <div>
                     <h3 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Patients Today</h3>
                     <p style={{ fontSize: '1.5rem', fontWeight: 700 }}>
-                      {appointments.filter(a => a.doctor_id === 'doc-1' && a.status === 'confirmed').length}
+                      {appointments.filter(a => a.doctor_id === ACTING_DOCTOR_ID && a.status === 'confirmed').length}
                     </p>
                   </div>
                 </div>
@@ -361,7 +432,7 @@ function App() {
                   <div>
                     <h3 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Pending Requests</h3>
                     <p style={{ fontSize: '1.5rem', fontWeight: 700 }}>
-                      {appointments.filter(a => a.doctor_id === 'doc-1' && a.status === 'pending').length}
+                      {appointments.filter(a => a.doctor_id === ACTING_DOCTOR_ID && a.status === 'pending').length}
                     </p>
                   </div>
                 </div>
@@ -398,7 +469,7 @@ function App() {
                         </tr>
                       </thead>
                       <tbody>
-                        {appointments.filter(a => a.doctor_id === 'doc-1').map(app => (
+                        {appointments.filter(a => a.doctor_id === ACTING_DOCTOR_ID).map(app => (
                           <tr key={app.id}>
                             <td style={{ fontWeight: 600 }}>{getPatientName(app.patient_id)}</td>
                             <td>{app.appointment_date}</td>
@@ -455,7 +526,7 @@ function App() {
                   </h3>
                   
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    {schedules.filter(s => s.doctor_id === 'doc-1').map(sch => (
+                    {schedules.filter(s => s.doctor_id === ACTING_DOCTOR_ID).map(sch => (
                       <div 
                         key={sch.id} 
                         style={{ 
