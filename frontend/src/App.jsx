@@ -10,10 +10,8 @@ import {
   Plus, 
   Check, 
   X, 
-  Search, 
   MapPin, 
   FileText, 
-  Sliders, 
   Stethoscope 
 } from 'lucide-react';
 import './App.css';
@@ -97,6 +95,7 @@ function App() {
     fetchPatients();
     fetchAppointments();
     fetchSchedules();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Set default selected doctor once doctors are loaded
