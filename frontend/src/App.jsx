@@ -736,7 +736,7 @@ function App() {
           <div style={{ display: 'flex', gap: '1rem' }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
               <span style={{ width: '8px', height: '8px', background: '#10b981', borderRadius: '50%' }}></span>
-              Connected to Mock Mongoose DB
+              Connected to Supabase DB
             </span>
           </div>
         </div>
