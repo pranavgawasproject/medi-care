@@ -27,8 +27,7 @@
 ```
 .
 ├── backend/
-│   ├── db/                 # MongoDB connection
-│   ├── models/             # doctor / patient / appointment / schedules
+│   ├── db/                 # Supabase client connection
 │   └── server.js
 └── frontend/               # React app (Vite)
     └── src/
