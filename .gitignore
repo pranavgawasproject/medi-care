@@ -5,3 +5,7 @@ node_modules
 dist
 dist-ssr
 *.local
+
+# Dev logs
+*.log
+vite-dev.log
