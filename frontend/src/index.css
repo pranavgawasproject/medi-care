@@ -34,10 +34,53 @@
   --font-heading: 'Outfit', system-ui, sans-serif;
 }
 
-/* Dark medical theme (matches the repo's original identity) */
+/* ============================================================
+   LIGHT THEME (default — :root holds the light palette)
+   ============================================================ */
 :root {
   --radius: 0.875rem;
 
+  /* Soft warm off-white with a faint teal tint */
+  --background: oklch(0.985 0.006 175);
+  --foreground: oklch(0.21 0.02 175);
+
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.21 0.02 175);
+
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.21 0.02 175);
+
+  /* Teal primary — slightly deeper for contrast on white */
+  --primary: oklch(0.55 0.12 178);
+  --primary-foreground: oklch(0.99 0.005 175);
+
+  --secondary: oklch(0.96 0.008 175);
+  --secondary-foreground: oklch(0.3 0.02 175);
+
+  --muted: oklch(0.96 0.006 175);
+  --muted-foreground: oklch(0.5 0.015 175);
+
+  /* Coral accent */
+  --accent: oklch(0.68 0.16 45);
+  --accent-foreground: oklch(0.99 0.005 175);
+
+  --destructive: oklch(0.58 0.22 25);
+
+  --border: oklch(0.9 0.01 175);
+  --input: oklch(0.92 0.01 175);
+  --ring: oklch(0.55 0.12 178);
+
+  --chart-1: oklch(0.55 0.12 178);
+  --chart-2: oklch(0.68 0.16 45);
+  --chart-3: oklch(0.6 0.13 145);
+  --chart-4: oklch(0.62 0.1 220);
+  --chart-5: oklch(0.72 0.15 80);
+}
+
+/* ============================================================
+   DARK THEME (applied when <html> has class="dark")
+   ============================================================ */
+.dark {
   --background: oklch(0.16 0.015 200);
   --foreground: oklch(0.97 0.008 200);
 
@@ -47,7 +90,6 @@
   --popover: oklch(0.21 0.018 200);
   --popover-foreground: oklch(0.97 0.008 200);
 
-  /* Teal primary */
   --primary: oklch(0.68 0.13 178);
   --primary-foreground: oklch(0.16 0.02 200);
 
@@ -57,7 +99,6 @@
   --muted: oklch(0.25 0.015 200);
   --muted-foreground: oklch(0.68 0.015 200);
 
-  /* Coral accent */
   --accent: oklch(0.72 0.16 45);
   --accent-foreground: oklch(0.16 0.02 200);
 
@@ -87,10 +128,16 @@
     font-family: var(--font-sans);
     min-height: 100vh;
     background-image:
-      radial-gradient(at 0% 0%, oklch(0.68 0.13 178 / 0.08) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, oklch(0.72 0.16 45 / 0.06) 0px, transparent 50%);
+      radial-gradient(at 0% 0%, oklch(0.55 0.12 178 / 0.07) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, oklch(0.68 0.16 45 / 0.05) 0px, transparent 50%);
     background-attachment: fixed;
     -webkit-font-smoothing: antialiased;
+  }
+  /* In dark mode, the body uses a stronger glow */
+  .dark body {
+    background-image:
+      radial-gradient(at 0% 0%, oklch(0.68 0.13 178 / 0.1) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, oklch(0.72 0.16 45 / 0.07) 0px, transparent 50%);
   }
   h1, h2, h3, h4, h5 {
     font-family: var(--font-heading);
@@ -98,7 +145,7 @@
   }
 }
 
-/* Thin scrollbar */
+/* Thin scrollbar — theme aware */
 .scroll-area-thin::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -107,37 +154,67 @@
   background: transparent;
 }
 .scroll-area-thin::-webkit-scrollbar-thumb {
-  background: oklch(0.4 0.02 200);
+  background: oklch(0.8 0.01 175);
   border-radius: 9999px;
 }
+.dark .scroll-area-thin::-webkit-scrollbar-thumb {
+  background: oklch(0.4 0.02 200);
+}
 .scroll-area-thin::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.65 0.04 175);
+}
+.dark .scroll-area-thin::-webkit-scrollbar-thumb:hover {
   background: oklch(0.55 0.05 200);
 }
 
-/* Subtle grid background */
+/* Subtle grid background — theme aware */
 .bg-grid {
   background-image:
-    linear-gradient(to right, oklch(1 0 0 / 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, oklch(1 0 0 / 0.04) 1px, transparent 1px);
+    linear-gradient(to right, oklch(0.5 0.05 175 / 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(0.5 0.05 175 / 0.08) 1px, transparent 1px);
   background-size: 32px 32px;
 }
+.dark .bg-grid {
+  background-image:
+    linear-gradient(to right, oklch(1 0 0 / 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(1 0 0 / 0.05) 1px, transparent 1px);
+}
 
-/* Gradient mesh for hero cards */
+/* Gradient mesh for hero cards — theme aware */
 .bg-mesh {
+  background-image:
+    radial-gradient(at 20% 10%, oklch(0.55 0.12 178 / 0.12) 0px, transparent 50%),
+    radial-gradient(at 80% 0%, oklch(0.6 0.13 145 / 0.10) 0px, transparent 50%),
+    radial-gradient(at 0% 90%, oklch(0.68 0.16 45 / 0.08) 0px, transparent 50%);
+}
+.dark .bg-mesh {
   background-image:
     radial-gradient(at 20% 10%, oklch(0.68 0.13 178 / 0.18) 0px, transparent 50%),
     radial-gradient(at 80% 0%, oklch(0.7 0.13 145 / 0.14) 0px, transparent 50%),
     radial-gradient(at 0% 90%, oklch(0.72 0.16 45 / 0.12) 0px, transparent 50%);
 }
 
-/* Native date input — recolor calendar icon for dark theme */
+/* Native date input — calendar icon visible on both themes */
 input[type="date"]::-webkit-calendar-picker-indicator {
-  filter: invert(0.8);
   cursor: pointer;
 }
+.dark input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.8);
+}
 
-/* Native select option styling for dark theme */
+/* Native select option styling — theme aware */
 select option {
-  background: oklch(0.21 0.018 200);
-  color: oklch(0.97 0.008 200);
+  background: var(--popover);
+  color: var(--popover-foreground);
+}
+
+/* Smooth theme transition */
+html.theme-transition,
+html.theme-transition *,
+html.theme-transition *::before,
+html.theme-transition *::after {
+  transition:
+    background-color 0.25s ease,
+    border-color 0.25s ease,
+    color 0.25s ease !important;
 }

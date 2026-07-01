@@ -11,9 +11,9 @@ const buttonVariants = {
     'border border-border bg-transparent text-foreground hover:bg-secondary/60',
   ghost: 'bg-transparent text-foreground hover:bg-secondary/60',
   destructive:
-    'bg-rose-500/15 text-rose-400 border border-rose-500/25 hover:bg-rose-500/25',
+    'bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/25 hover:bg-rose-500/25',
   success:
-    'bg-emerald-500/15 text-emerald-400 border border-emerald-500/25 hover:bg-emerald-500/25',
+    'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 hover:bg-emerald-500/25',
 }
 const buttonSizes = {
   sm: 'h-8 px-2.5 text-xs gap-1.5',
@@ -85,25 +85,30 @@ export function Badge({ className, ...props }) {
 }
 
 /* ---------------- Status Badge ---------------- */
+// Uses Tailwind's dark: variant so colours stay readable on both themes.
 const statusConfig = {
   confirmed: {
     label: 'Confirmed',
-    className: 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/25',
+    className:
+      'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25',
     dot: 'bg-emerald-500',
   },
   pending: {
     label: 'Pending',
-    className: 'bg-amber-500/15 text-amber-400 border border-amber-500/25',
+    className:
+      'bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/25',
     dot: 'bg-amber-500',
   },
   cancelled: {
     label: 'Cancelled',
-    className: 'bg-rose-500/15 text-rose-400 border border-rose-500/25',
+    className:
+      'bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-500/25',
     dot: 'bg-rose-500',
   },
   completed: {
     label: 'Completed',
-    className: 'bg-teal-500/15 text-teal-400 border border-teal-500/25',
+    className:
+      'bg-teal-500/15 text-teal-700 dark:text-teal-400 border border-teal-500/25',
     dot: 'bg-teal-500',
   },
 }
@@ -134,7 +139,7 @@ export function InitialsAvatar({ name, color, size = 'md' }) {
   return (
     <div
       className={cn(
-        'flex shrink-0 items-center justify-center rounded-full font-semibold text-white shadow-sm ring-2 ring-white/10',
+        'flex shrink-0 items-center justify-center rounded-full font-semibold text-white shadow-sm ring-2 ring-black/5 dark:ring-white/10',
         sizes[size]
       )}
       style={{ backgroundColor: color }}

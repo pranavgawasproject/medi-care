@@ -46,10 +46,13 @@ import {
 } from './ui'
 import { cn } from '../lib/utils'
 import { SPECIALTIES, colorForName, CLINIC_WEEKLY_TREND } from '../data/seed'
+import { useTheme } from '../hooks/useTheme'
 
 export function AdminView({ doctors, patients, appointments, onAddDoctor, onUpdateStatus }) {
   const { toast } = useToast()
+  const { theme } = useTheme()
   const [query, setQuery] = useState('')
+  const isDark = theme === 'dark'
 
   // Onboard form
   const [name, setName] = useState('')
@@ -140,7 +143,7 @@ export function AdminView({ doctors, patients, appointments, onAddDoctor, onUpda
                 Completion Rate
               </p>
               <p className="text-2xl font-bold leading-none">{completionRate}%</p>
-              <p className="text-[11px] text-emerald-400">+2.4% this month</p>
+              <p className="text-[11px] text-emerald-600 dark:text-emerald-400">+2.4% this month</p>
             </div>
           </div>
         </div>
@@ -165,7 +168,7 @@ export function AdminView({ doctors, patients, appointments, onAddDoctor, onUpda
                 </CardTitle>
                 <CardDescription>Appointment volume over the last 7 days</CardDescription>
               </div>
-              <Badge className="bg-emerald-500/15 text-emerald-400 border border-emerald-500/25">+18.2% WoW</Badge>
+              <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25">+18.2% WoW</Badge>
             </div>
           </CardHeader>
           <CardContent>
@@ -174,30 +177,30 @@ export function AdminView({ doctors, patients, appointments, onAddDoctor, onUpda
                 <AreaChart data={trendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <defs>
                     <linearGradient id="bookingsFill" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="oklch(0.68 0.13 178)" stopOpacity={0.4} />
-                      <stop offset="100%" stopColor="oklch(0.68 0.13 178)" stopOpacity={0} />
+                      <stop offset="0%" stopColor={isDark ? 'oklch(0.68 0.13 178)' : 'oklch(0.55 0.12 178)'} stopOpacity={0.4} />
+                      <stop offset="100%" stopColor={isDark ? 'oklch(0.68 0.13 178)' : 'oklch(0.55 0.12 178)'} stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="oklch(1 0 0 / 0.08)" vertical={false} />
-                  <XAxis dataKey="day" tick={{ fontSize: 11, fill: 'oklch(0.68 0.015 200)' }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 11, fill: 'oklch(0.68 0.015 200)' }} axisLine={false} tickLine={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke={isDark ? 'oklch(1 0 0 / 0.08)' : 'oklch(0 0 0 / 0.08)'} vertical={false} />
+                  <XAxis dataKey="day" tick={{ fontSize: 11, fill: isDark ? 'oklch(0.68 0.015 200)' : 'oklch(0.5 0.015 175)' }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 11, fill: isDark ? 'oklch(0.68 0.015 200)' : 'oklch(0.5 0.015 175)' }} axisLine={false} tickLine={false} />
                   <Tooltip
                     contentStyle={{
                       borderRadius: 12,
-                      border: '1px solid oklch(1 0 0 / 0.1)',
-                      background: 'oklch(0.21 0.018 200 / 0.95)',
-                      color: '#f8fafc',
+                      border: isDark ? '1px solid oklch(1 0 0 / 0.1)' : '1px solid oklch(0 0 0 / 0.1)',
+                      background: isDark ? 'oklch(0.21 0.018 200 / 0.95)' : 'oklch(1 0 0 / 0.95)',
+                      color: isDark ? '#f8fafc' : '#1a2a2a',
                       fontSize: 12,
-                      boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+                      boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
                     }}
                   />
                   <Area
                     type="monotone"
                     dataKey="bookings"
-                    stroke="oklch(0.68 0.13 178)"
+                    stroke={isDark ? 'oklch(0.68 0.13 178)' : 'oklch(0.55 0.12 178)'}
                     strokeWidth={2.5}
                     fill="url(#bookingsFill)"
-                    dot={{ r: 3, fill: 'oklch(0.68 0.13 178)' }}
+                    dot={{ r: 3, fill: isDark ? 'oklch(0.68 0.13 178)' : 'oklch(0.55 0.12 178)' }}
                     activeDot={{ r: 5 }}
                   />
                 </AreaChart>
@@ -266,7 +269,7 @@ export function AdminView({ doctors, patients, appointments, onAddDoctor, onUpda
                 <p className="mt-2 truncate text-sm font-semibold">{d.full_name}</p>
                 <p className="truncate text-xs text-muted-foreground">{d.specialization}</p>
                 <div className="mt-2 flex items-center gap-2 text-xs">
-                  <span className="flex items-center gap-1 text-amber-400">
+                  <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
                     <Award className="h-3 w-3" /> 4.8
                   </span>
                   <span className="text-muted-foreground">·</span>
@@ -395,7 +398,9 @@ function AdminStatCard({ icon: Icon, label, value, trend, accent }) {
         <div
           className={cn(
             'flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold',
-            trend.dir === 'up' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-rose-500/15 text-rose-400'
+            trend.dir === 'up'
+              ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
+              : 'bg-rose-500/15 text-rose-600 dark:text-rose-400'
           )}
         >
           <TrendIcon className="h-2.5 w-2.5" />

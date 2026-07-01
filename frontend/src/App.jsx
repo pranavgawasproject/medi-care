@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { supabase } from './supabaseClient'
 import { ToastProvider } from './hooks/useToast'
+import { ThemeProvider } from './hooks/useTheme'
 import { Header } from './components/Header'
 import { Footer } from './components/Footer'
 import { PatientView } from './components/PatientView'
@@ -178,8 +179,9 @@ function App() {
   )
 
   return (
-    <ToastProvider>
-      <div className="flex min-h-screen flex-col bg-background">
+    <ThemeProvider>
+      <ToastProvider>
+        <div className="flex min-h-screen flex-col bg-background">
         <Header view={role} setView={setRole} connected={connected} />
 
         <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
@@ -223,8 +225,9 @@ function App() {
         </main>
 
         <Footer />
-      </div>
-    </ToastProvider>
+        </div>
+      </ToastProvider>
+    </ThemeProvider>
   )
 }
 
