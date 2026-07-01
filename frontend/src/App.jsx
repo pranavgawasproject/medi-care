@@ -28,7 +28,7 @@ function App() {
 
   // Form State for Booking
   const [selectedDoctorId, setSelectedDoctorId] = useState('');
-  const [bookingDate, setBookingDate] = useState('2026-06-26');
+  const [bookingDate, setBookingDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [bookingTime, setBookingTime] = useState('10:00 AM');
   
   // Form State for Adding Doctor
