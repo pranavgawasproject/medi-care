@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
-import { Activity, HeartPulse, Stethoscope, ShieldAlert } from 'lucide-react'
+import { HeartPulse, Stethoscope, ShieldAlert } from 'lucide-react'
 import { cn } from '../lib/utils'
+import { ThemeToggle } from './ThemeToggle'
 
 const VIEWS = [
   { key: 'patient', label: 'Patient', icon: HeartPulse },
@@ -61,9 +62,9 @@ export function Header({ view, setView, connected }) {
           })}
         </nav>
 
-        {/* Connection status */}
-        <div className="hidden items-center gap-3 md:flex">
-          <div className="flex items-center gap-2 rounded-full border border-border/70 bg-card/60 px-3 py-1.5">
+        {/* Connection status + theme toggle */}
+        <div className="flex items-center gap-2">
+          <div className="hidden items-center gap-2 rounded-full border border-border/70 bg-card/60 px-3 py-1.5 sm:flex">
             <span className="flex h-2 w-2">
               <span
                 className={`relative inline-flex h-2 w-2 rounded-full ${
@@ -72,9 +73,10 @@ export function Header({ view, setView, connected }) {
               />
             </span>
             <span className="text-xs font-medium text-muted-foreground">
-              {connected ? 'Connected to Supabase' : 'Demo mode (mock data)'}
+              {connected ? 'Connected to Supabase' : 'Demo mode'}
             </span>
           </div>
+          <ThemeToggle />
         </div>
       </div>
     </header>

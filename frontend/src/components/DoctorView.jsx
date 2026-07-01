@@ -91,7 +91,7 @@ export function DoctorView({ doctors, patients, appointments, schedules, onUpdat
               </h2>
               <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1.5">
-                  <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                  <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />
                   {DOCTOR_SELF.rating}
                 </span>
                 <span>·</span>
@@ -128,7 +128,7 @@ export function DoctorView({ doctors, patients, appointments, schedules, onUpdat
         <Card className="lg:col-span-2 overflow-hidden">
           <CardHeader className="bg-muted/30">
             <CardTitle>
-              <Bell className="h-4 w-4 text-amber-400" /> Pending Requests
+              <Bell className="h-4 w-4 text-amber-500" /> Pending Requests
               {pending.length > 0 && (
                 <Badge className="ml-1 bg-amber-500 text-white">{pending.length}</Badge>
               )}
@@ -169,7 +169,7 @@ export function DoctorView({ doctors, patients, appointments, schedules, onUpdat
                               <Clock className="h-3 w-3" /> {r.appointment_time}
                             </span>
                             {isToday && (
-                              <span className="rounded bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-amber-400">
+                              <span className="rounded bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-amber-600 dark:text-amber-400">
                                 TODAY
                               </span>
                             )}

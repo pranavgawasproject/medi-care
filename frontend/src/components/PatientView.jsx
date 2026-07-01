@@ -310,7 +310,7 @@ export function PatientView({ doctors, appointments, onBook, onCancel, connected
                   <p className="text-xs text-muted-foreground">{selectedDoctor.specialization}</p>
                   <div className="mt-2 flex items-center gap-3 text-xs">
                     <span className="flex items-center gap-1 font-medium">
-                      <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                      <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
                       4.9
                     </span>
                     <span className="text-muted-foreground">
