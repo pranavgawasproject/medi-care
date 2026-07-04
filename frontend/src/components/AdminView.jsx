@@ -118,7 +118,7 @@ export function AdminView({ doctors, patients, appointments, onAddDoctor, onUpda
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="relative overflow-hidden rounded-3xl border border-border/60 bg-card p-6 shadow-sm sm:p-8"
+        className="relative overflow-hidden rounded-md border border-border bg-card p-6  sm:p-8"
       >
         <div className="absolute inset-0 bg-grid opacity-[0.04]" />
         <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
@@ -134,16 +134,16 @@ export function AdminView({ doctors, patients, appointments, onAddDoctor, onUpda
               Real-time visibility across the entire clinic network.
             </p>
           </div>
-          <div className="flex items-center gap-3 rounded-2xl border border-border/60 bg-gradient-to-br from-primary/10 to-emerald-500/10 p-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-emerald-600 text-primary-foreground shadow-md shadow-primary/30">
+          <div className="flex items-center gap-3 rounded-md border border-border border-l-4 border-l-primary bg-card p-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-md border border-primary/30 bg-primary/10 text-primary">
               <Award className="h-6 w-6" />
             </div>
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                 Completion Rate
               </p>
-              <p className="text-2xl font-bold leading-none">{completionRate}%</p>
-              <p className="text-[11px] text-emerald-600 dark:text-emerald-400">+2.4% this month</p>
+              <p className="font-mono text-2xl font-semibold leading-none">{completionRate}%</p>
+              <p className="text-[11px] text-primary">+2.4% this month</p>
             </div>
           </div>
         </div>
@@ -151,10 +151,10 @@ export function AdminView({ doctors, patients, appointments, onAddDoctor, onUpda
 
       {/* Stat cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <AdminStatCard icon={Stethoscope} label="Onboarded Doctors" value={doctors.length.toString()} trend={{ dir: 'up', text: 'Active practitioners' }} accent="from-primary to-emerald-600" />
-        <AdminStatCard icon={Users} label="Registered Patients" value={patients.length.toString()} trend={{ dir: 'up', text: 'In the system' }} accent="from-teal-500 to-cyan-600" />
-        <AdminStatCard icon={CalendarCheck} label="Total Bookings" value={appointments.length.toString()} trend={{ dir: 'up', text: 'All time' }} accent="from-amber-500 to-orange-500" />
-        <AdminStatCard icon={Activity} label="Avg Wait Time" value="8m" trend={{ dir: 'down', text: '-3m improvement' }} accent="from-rose-500 to-pink-500" />
+        <AdminStatCard icon={Stethoscope} label="Onboarded Doctors" value={doctors.length.toString()} trend={{ dir: 'up', text: 'Active practitioners' }} accent="border-l-primary" />
+        <AdminStatCard icon={Users} label="Registered Patients" value={patients.length.toString()} trend={{ dir: 'up', text: 'In the system' }} accent="border-l-primary" />
+        <AdminStatCard icon={CalendarCheck} label="Total Bookings" value={appointments.length.toString()} trend={{ dir: 'up', text: 'All time' }} accent="border-l-accent" />
+        <AdminStatCard icon={Activity} label="Avg Wait Time" value="8m" trend={{ dir: 'down', text: '-3m improvement' }} accent="border-l-destructive" />
       </div>
 
       {/* Chart + onboard form */}
@@ -263,7 +263,7 @@ export function AdminView({ doctors, patients, appointments, onAddDoctor, onUpda
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: i * 0.04 }}
-                className="group rounded-2xl border border-border/60 bg-gradient-to-b from-card to-muted/20 p-3 transition-all hover:border-primary/40 hover:shadow-md"
+                className="group rounded-md border border-border bg-muted/20 p-3 transition-all hover:border-primary/50"
               >
                 <InitialsAvatar name={d.full_name} color={colorForName(d.full_name)} size="md" />
                 <p className="mt-2 truncate text-sm font-semibold">{d.full_name}</p>
@@ -389,27 +389,26 @@ function AdminStatCard({ icon: Icon, label, value, trend, accent }) {
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card p-4 shadow-sm transition-all hover:shadow-md"
+      className={cn('rounded-md border border-border border-l-4 bg-card p-4 transition-colors hover:border-primary/50', accent)}
     >
       <div className="flex items-start justify-between">
-        <div className={cn('flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br text-white shadow-sm', accent)}>
-          <Icon className="h-5 w-5" />
+        <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+          <Icon className="h-3.5 w-3.5" /> {label}
         </div>
         <div
           className={cn(
-            'flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold',
+            'flex items-center gap-1 rounded-sm border px-1.5 py-0.5 font-mono text-[10px] font-medium',
             trend.dir === 'up'
-              ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
-              : 'bg-rose-500/15 text-rose-600 dark:text-rose-400'
+              ? 'border-primary/30 text-primary'
+              : 'border-destructive/30 text-destructive'
           )}
         >
           <TrendIcon className="h-2.5 w-2.5" />
           {trend.dir}
         </div>
       </div>
-      <p className="mt-3 text-2xl font-bold leading-none tracking-tight">{value}</p>
-      <p className="mt-1 text-xs font-medium text-muted-foreground">{label}</p>
-      <p className="mt-1.5 text-[11px] text-muted-foreground/80">{trend.text}</p>
+      <p className="mt-2 font-mono text-2xl font-semibold leading-none tracking-tight">{value}</p>
+      <p className="mt-2 text-[11px] text-muted-foreground/80">{trend.text}</p>
     </motion.div>
   )
 }

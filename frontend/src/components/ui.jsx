@@ -4,16 +4,16 @@ import { cn } from '../lib/utils'
 /* ---------------- Button ---------------- */
 const buttonVariants = {
   primary:
-    'bg-gradient-to-br from-primary to-emerald-600 text-primary-foreground shadow-md shadow-primary/25 hover:shadow-primary/40',
+    'bg-primary text-primary-foreground border border-primary hover:opacity-90',
   secondary:
-    'bg-secondary text-secondary-foreground border border-border hover:bg-secondary/80',
+    'bg-secondary text-secondary-foreground border border-border hover:bg-secondary/70',
   outline:
     'border border-border bg-transparent text-foreground hover:bg-secondary/60',
   ghost: 'bg-transparent text-foreground hover:bg-secondary/60',
   destructive:
-    'bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/25 hover:bg-rose-500/25',
+    'bg-transparent text-destructive border border-destructive/40 hover:bg-destructive/10',
   success:
-    'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 hover:bg-emerald-500/25',
+    'bg-transparent text-primary border border-primary/40 hover:bg-primary/10',
 }
 const buttonSizes = {
   sm: 'h-8 px-2.5 text-xs gap-1.5',
@@ -31,7 +31,7 @@ export const Button = forwardRef(function Button(
       ref={ref}
       type={type}
       className={cn(
-        'inline-flex items-center justify-center rounded-xl font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 disabled:pointer-events-none active:scale-[0.98]',
+        'inline-flex items-center justify-center rounded-md font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 disabled:pointer-events-none',
         buttonVariants[variant],
         buttonSizes[size],
         className
@@ -41,12 +41,12 @@ export const Button = forwardRef(function Button(
   )
 })
 
-/* ---------------- Card ---------------- */
+/* ---------------- Card (chart-form styling: label over a hairline rule) ---------------- */
 export function Card({ className, ...props }) {
   return (
     <div
       className={cn(
-        'rounded-2xl border border-border bg-card text-card-foreground shadow-sm',
+        'rounded-md border border-border bg-card text-card-foreground',
         className
       )}
       {...props}
@@ -54,18 +54,21 @@ export function Card({ className, ...props }) {
   )
 }
 export function CardHeader({ className, ...props }) {
-  return <div className={cn('p-5 border-b border-border/60', className)} {...props} />
+  return <div className={cn('p-5 border-b border-border', className)} {...props} />
 }
 export function CardTitle({ className, ...props }) {
   return (
     <h3
-      className={cn('text-base font-semibold leading-none tracking-tight flex items-center gap-2', className)}
+      className={cn(
+        'text-[11px] font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2',
+        className
+      )}
       {...props}
     />
   )
 }
 export function CardDescription({ className, ...props }) {
-  return <p className={cn('text-xs text-muted-foreground mt-1', className)} {...props} />
+  return <p className={cn('text-sm text-foreground mt-1', className)} {...props} />
 }
 export function CardContent({ className, ...props }) {
   return <div className={cn('p-5', className)} {...props} />
@@ -76,7 +79,7 @@ export function Badge({ className, ...props }) {
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide',
+        'inline-flex items-center gap-1.5 rounded-sm border px-2 py-0.5 text-[10px] font-mono font-medium uppercase tracking-wide',
         className
       )}
       {...props}
@@ -85,31 +88,26 @@ export function Badge({ className, ...props }) {
 }
 
 /* ---------------- Status Badge ---------------- */
-// Uses Tailwind's dark: variant so colours stay readable on both themes.
 const statusConfig = {
   confirmed: {
     label: 'Confirmed',
-    className:
-      'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25',
-    dot: 'bg-emerald-500',
+    className: 'bg-primary/10 text-primary border-primary/30',
+    dot: 'bg-primary',
   },
   pending: {
     label: 'Pending',
-    className:
-      'bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/25',
-    dot: 'bg-amber-500',
+    className: 'bg-accent/10 text-accent border-accent/30',
+    dot: 'bg-accent',
   },
   cancelled: {
     label: 'Cancelled',
-    className:
-      'bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-500/25',
-    dot: 'bg-rose-500',
+    className: 'bg-destructive/10 text-destructive border-destructive/30',
+    dot: 'bg-destructive',
   },
   completed: {
     label: 'Completed',
-    className:
-      'bg-teal-500/15 text-teal-700 dark:text-teal-400 border border-teal-500/25',
-    dot: 'bg-teal-500',
+    className: 'bg-muted text-muted-foreground border-border',
+    dot: 'bg-muted-foreground',
   },
 }
 export function StatusBadge({ status }) {
@@ -122,7 +120,7 @@ export function StatusBadge({ status }) {
   )
 }
 
-/* ---------------- Avatar (initials) ---------------- */
+/* ---------------- Avatar (initials) — squared, chart-tag style ---------------- */
 export function InitialsAvatar({ name, color, size = 'md' }) {
   const initials = name
     .replace(/^Dr\.?\s*/i, '')
@@ -139,7 +137,7 @@ export function InitialsAvatar({ name, color, size = 'md' }) {
   return (
     <div
       className={cn(
-        'flex shrink-0 items-center justify-center rounded-full font-semibold text-white shadow-sm ring-2 ring-black/5 dark:ring-white/10',
+        'flex shrink-0 items-center justify-center rounded-md font-mono font-semibold text-white border border-black/10',
         sizes[size]
       )}
       style={{ backgroundColor: color }}
@@ -155,7 +153,7 @@ export const Input = forwardRef(function Input({ className, ...props }, ref) {
     <input
       ref={ref}
       className={cn(
-        'flex h-10 w-full rounded-xl border border-border bg-input/40 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/60 outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/30',
+        'flex h-10 w-full rounded-md border border-border bg-input/30 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/60 outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary',
         className
       )}
       {...props}
@@ -168,7 +166,7 @@ export function Label({ className, ...props }) {
   return (
     <label
       className={cn(
-        'text-xs font-semibold uppercase tracking-wide text-muted-foreground',
+        'text-[11px] font-semibold uppercase tracking-wider text-muted-foreground',
         className
       )}
       {...props}
@@ -182,7 +180,7 @@ export const Select = forwardRef(function Select({ className, children, ...props
     <select
       ref={ref}
       className={cn(
-        'flex h-10 w-full rounded-xl border border-border bg-input/40 px-3 py-2 text-sm text-foreground outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/30 appearance-none bg-no-repeat',
+        'flex h-10 w-full rounded-md border border-border bg-input/30 px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary appearance-none bg-no-repeat',
         className
       )}
       style={{
@@ -217,7 +215,7 @@ export function TableRow({ className, ...props }) {
   return (
     <tr
       className={cn(
-        'border-b border-border/50 transition-colors hover:bg-muted/30',
+        'border-b border-border transition-colors hover:bg-muted/40',
         className
       )}
       {...props}
@@ -228,7 +226,7 @@ export function TableHead({ className, ...props }) {
   return (
     <th
       className={cn(
-        'h-10 px-4 text-left align-middle text-xs font-semibold uppercase tracking-wide text-muted-foreground',
+        'h-10 px-4 text-left align-middle text-[11px] font-semibold uppercase tracking-wider text-muted-foreground',
         className
       )}
       {...props}
@@ -237,7 +235,7 @@ export function TableHead({ className, ...props }) {
 }
 export function TableCell({ className, ...props }) {
   return (
-    <td className={cn('px-4 py-3 align-middle', className)} {...props} />
+    <td className={cn('px-4 py-3 align-middle font-mono text-sm', className)} {...props} />
   )
 }
 
@@ -253,14 +251,27 @@ export function Progress({ value = 0, className }) {
   return (
     <div
       className={cn(
-        'relative h-1.5 w-full overflow-hidden rounded-full bg-secondary',
+        'relative h-1.5 w-full overflow-hidden rounded-sm bg-secondary',
         className
       )}
     >
       <div
-        className="h-full rounded-full bg-gradient-to-r from-primary to-emerald-500 transition-all"
+        className="h-full bg-primary transition-all"
         style={{ width: `${Math.min(100, Math.max(0, value))}%` }}
       />
     </div>
+  )
+}
+
+/* ---------------- ECG signature divider ---------------- */
+export function EcgDivider({ pulse = false, className }) {
+  return (
+    <svg
+      viewBox="0 0 400 20"
+      preserveAspectRatio="none"
+      className={cn('ecg-line', pulse && 'pulse', className)}
+    >
+      <path d="M0 10 H140 L155 10 L163 2 L172 18 L180 10 H210 L222 10 L230 4 L238 16 L246 10 H400" />
+    </svg>
   )
 }

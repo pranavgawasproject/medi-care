@@ -76,7 +76,7 @@ export function DoctorView({ doctors, patients, appointments, schedules, onUpdat
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="relative overflow-hidden rounded-3xl border border-border/60 bg-card p-6 shadow-sm sm:p-8"
+        className="relative overflow-hidden rounded-md border border-border bg-card p-6  sm:p-8"
       >
         <div className="absolute inset-0 bg-mesh opacity-70" />
         <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
@@ -101,8 +101,8 @@ export function DoctorView({ doctors, patients, appointments, schedules, onUpdat
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2 rounded-2xl border border-border/60 bg-background/60 px-4 py-3 backdrop-blur">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/15 text-primary">
+          <div className="flex items-center gap-2 rounded-md border border-border bg-background px-4 py-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/15 text-primary">
               <Building2 className="h-5 w-5" />
             </div>
             <div>
@@ -117,10 +117,10 @@ export function DoctorView({ doctors, patients, appointments, schedules, onUpdat
 
       {/* Stat cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard icon={Users} label="Patients Today" value={patientsToday.toString()} accent="from-primary to-emerald-600" trend="+3 vs yesterday" />
-        <StatCard icon={Bell} label="Pending Requests" value={pending.length.toString()} accent="from-amber-500 to-orange-500" trend="Needs action" />
-        <StatCard icon={Clock} label="Slots Filled" value={`${confirmed.length}/${slotsPerDay}`} accent="from-teal-500 to-cyan-600" trend={`${utilization}% utilization`} />
-        <StatCard icon={TrendingUp} label="Weekly Rating" value={DOCTOR_SELF.rating.toFixed(1)} accent="from-rose-500 to-pink-500" trend="+0.2 this week" />
+        <StatCard icon={Users} label="Patients Today" value={patientsToday.toString()} accent="border-l-primary" trend="+3 vs yesterday" />
+        <StatCard icon={Bell} label="Pending Requests" value={pending.length.toString()} accent="border-l-accent" trend="Needs action" />
+        <StatCard icon={Clock} label="Slots Filled" value={`${confirmed.length}/${slotsPerDay}`} accent="border-l-primary" trend={`${utilization}% utilization`} />
+        <StatCard icon={TrendingUp} label="Weekly Rating" value={DOCTOR_SELF.rating.toFixed(1)} accent="border-l-destructive" trend="+0.2 this week" />
       </div>
 
       {/* Pending + Schedule */}
@@ -228,7 +228,7 @@ export function DoctorView({ doctors, patients, appointments, schedules, onUpdat
                       initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.06 }}
-                      className="rounded-xl border border-border/60 bg-gradient-to-b from-card to-muted/20 p-4"
+                      className="rounded-md border border-border bg-muted/20 p-4"
                     >
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-bold uppercase tracking-wide" style={{ fontFamily: 'var(--font-heading)' }}>
@@ -333,15 +333,14 @@ function StatCard({ icon: Icon, label, value, accent, trend }) {
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card p-4 shadow-sm transition-all hover:shadow-md"
+      className={cn('rounded-md border border-border border-l-4 bg-card p-4 transition-colors hover:border-primary/50', accent)}
     >
-      <div className={cn('flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br text-white shadow-sm', accent)}>
-        <Icon className="h-5 w-5" />
+      <div className="flex items-center justify-between">
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
+        <Icon className="h-4 w-4 text-muted-foreground" />
       </div>
-      <p className="mt-3 text-2xl font-bold leading-none tracking-tight">{value}</p>
-      <p className="mt-1 text-xs font-medium text-muted-foreground">{label}</p>
+      <p className="mt-2 font-mono text-2xl font-semibold leading-none tracking-tight">{value}</p>
       <p className="mt-2 text-[11px] text-muted-foreground/80">{trend}</p>
-      <div className={cn('absolute -bottom-8 -right-8 h-24 w-24 rounded-full bg-gradient-to-br opacity-10 transition-transform group-hover:scale-150', accent)} />
     </motion.div>
   )
 }

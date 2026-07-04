@@ -119,31 +119,28 @@ export function PatientView({ doctors, appointments, onBook, onCancel, connected
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-primary/95 via-emerald-600 to-teal-700 p-6 text-white shadow-xl shadow-primary/20 sm:p-8"
+        className="relative overflow-hidden rounded-md border border-border border-l-4 border-l-primary bg-card p-6 sm:p-8"
       >
-        <div className="absolute inset-0 bg-grid opacity-10" />
-        <div className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-white/10 blur-2xl" />
-        <div className="absolute -bottom-24 right-24 h-48 w-48 rounded-full bg-accent/20 blur-2xl" />
         <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-medium backdrop-blur">
-              <span className="h-1.5 w-1.5 rounded-full bg-accent" /> Welcome back
+            <div className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+              <span className="h-1.5 w-1.5 rounded-full bg-primary" /> Patient Chart
             </div>
-            <h2 className="text-2xl font-bold tracking-tight sm:text-3xl" style={{ fontFamily: 'var(--font-heading)' }}>
+            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl" style={{ fontFamily: 'var(--font-heading)' }}>
               {actingPatient.name}
             </h2>
-            <p className="max-w-md text-sm text-white/80">
+            <p className="max-w-md text-sm text-muted-foreground">
               Your health journey at a glance. Manage upcoming visits, review
               medical notes, and book new consultations in seconds.
             </p>
             <div className="flex flex-wrap items-center gap-2 pt-1">
-              <span className="rounded-lg bg-white/15 px-3 py-1.5 text-xs font-medium backdrop-blur">
-                Patient ID · MC-4291
+              <span className="rounded-sm border border-border px-2.5 py-1 font-mono text-[11px] text-muted-foreground">
+                ID · MC-4291
               </span>
-              <span className="rounded-lg bg-white/15 px-3 py-1.5 text-xs font-medium backdrop-blur">
+              <span className="rounded-sm border border-border px-2.5 py-1 font-mono text-[11px] text-muted-foreground">
                 Hypertension · Monitored
               </span>
-              <span className="rounded-lg bg-white/15 px-3 py-1.5 text-xs font-medium backdrop-blur">
+              <span className="rounded-sm border border-border px-2.5 py-1 font-mono text-[11px] text-muted-foreground">
                 Blood Type · O+
               </span>
             </div>
@@ -190,7 +187,7 @@ export function PatientView({ doctors, appointments, onBook, onCancel, connected
                       transition={{ delay: i * 0.05 }}
                       className="group flex items-center gap-4 p-4 transition-colors hover:bg-muted/40"
                     >
-                      <div className="flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-xl bg-gradient-to-br from-primary/10 to-emerald-500/10 text-primary">
+                      <div className="flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-md bg-primary/10 text-primary">
                         <span className="text-[10px] font-semibold uppercase">
                           {format(d, 'MMM')}
                         </span>
@@ -298,7 +295,7 @@ export function PatientView({ doctors, appointments, onBook, onCancel, connected
                 ))}
               </Select>
             </div>
-            <div className="rounded-2xl border border-border/60 bg-gradient-to-br from-card to-muted/20 p-4">
+            <div className="rounded-md border border-border bg-muted/20 p-4">
               <div className="flex items-start gap-3">
                 <InitialsAvatar
                   name={selectedDoctor.full_name}
@@ -319,7 +316,7 @@ export function PatientView({ doctors, appointments, onBook, onCancel, connected
                   </div>
                 </div>
               </div>
-              <div className="mt-3 flex items-center gap-2 rounded-lg bg-primary/5 px-3 py-2 text-xs text-muted-foreground">
+              <div className="mt-3 flex items-center gap-2 rounded-sm bg-primary/5 px-3 py-2 text-xs text-muted-foreground">
                 <MapPin className="h-3.5 w-3.5 text-primary" />
                 {selectedDoctor.location}
               </div>
@@ -335,7 +332,7 @@ export function PatientView({ doctors, appointments, onBook, onCancel, connected
                       'flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition-all',
                       d.id === selectedDoctorId
                         ? 'border-primary bg-primary/15 text-primary'
-                        : 'border-border/70 bg-card text-muted-foreground hover:border-primary/40 hover:text-foreground'
+                        : 'border-border bg-card text-muted-foreground hover:border-primary/40 hover:text-foreground'
                     )}
                   >
                     <InitialsAvatar name={d.full_name} color={colorForName(d.full_name)} size="sm" />
@@ -351,14 +348,14 @@ export function PatientView({ doctors, appointments, onBook, onCancel, connected
           {/* Date */}
           <div className="space-y-3">
             <Label>Select date</Label>
-            <div className="rounded-2xl border border-border/60 bg-card p-4">
+            <div className="rounded-md border border-border bg-card p-4">
               <Input
                 type="date"
                 value={bookingDate}
                 onChange={(e) => setBookingDate(e.target.value)}
                 className="mb-3"
               />
-              <div className="rounded-xl bg-muted/40 p-3 text-center">
+              <div className="rounded-md bg-muted/40 p-3 text-center">
                 <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                   Selected
                 </p>
@@ -374,7 +371,7 @@ export function PatientView({ doctors, appointments, onBook, onCancel, connected
                   <div
                     key={d}
                     className={cn(
-                      'rounded-lg py-1.5 text-center text-[10px] font-medium',
+                      'rounded-sm py-1.5 text-center text-[10px] font-medium',
                       idx < 5 ? 'bg-primary/10 text-primary' : 'bg-muted/40 text-muted-foreground'
                     )}
                   >
@@ -399,10 +396,10 @@ export function PatientView({ doctors, appointments, onBook, onCancel, connected
                     key={slot}
                     onClick={() => setSelectedSlot(slot)}
                     className={cn(
-                      'flex flex-col items-center gap-0.5 rounded-xl border px-2 py-2.5 text-xs font-medium transition-all',
+                      'flex flex-col items-center gap-0.5 rounded-md border px-2 py-2.5 text-xs font-medium transition-all',
                       active
-                        ? 'border-primary bg-primary text-primary-foreground shadow-md shadow-primary/20'
-                        : 'border-border/70 bg-card text-foreground hover:border-primary/40 hover:bg-primary/5'
+                        ? 'border-primary bg-primary text-primary-foreground'
+                        : 'border-border bg-card text-foreground hover:border-primary/40 hover:bg-primary/5'
                     )}
                   >
                     <Clock className="h-3.5 w-3.5" />
@@ -411,7 +408,7 @@ export function PatientView({ doctors, appointments, onBook, onCancel, connected
                 )
               })}
             </div>
-            <div className="rounded-xl border border-dashed border-border/70 bg-muted/20 p-3 text-xs text-muted-foreground">
+            <div className="rounded-md border border-dashed border-border bg-muted/20 p-3 text-xs text-muted-foreground">
               <p className="flex items-center gap-1.5 font-medium text-foreground">
                 <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
                 {bookingDate ? format(parseISO(bookingDate), 'EEEE, MMM d') : 'Select a date'}
@@ -512,10 +509,10 @@ export function PatientView({ doctors, appointments, onBook, onCancel, connected
 
 function HeroStat({ icon: Icon, label, value }) {
   return (
-    <div className="rounded-2xl bg-white/10 p-3 backdrop-blur-md ring-1 ring-white/15">
-      <Icon className="h-4 w-4 text-white/80" />
-      <p className="mt-1.5 text-2xl font-bold leading-none">{value}</p>
-      <p className="mt-1 text-[10px] font-medium uppercase tracking-wide text-white/70">
+    <div className="rounded-md border border-border bg-muted/30 p-3">
+      <Icon className="h-4 w-4 text-primary" />
+      <p className="mt-1.5 font-mono text-2xl font-semibold leading-none">{value}</p>
+      <p className="mt-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
         {label}
       </p>
     </div>
