@@ -26,93 +26,94 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
-  --font-heading: 'Outfit', system-ui, sans-serif;
+  --radius-sm: 3px;
+  --radius-md: 5px;
+  --radius-lg: 6px;
+  --radius-xl: 8px;
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-heading: 'Space Grotesk', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
 }
 
 /* ============================================================
-   LIGHT THEME (default — :root holds the light palette)
+   LIGHT THEME — "chart paper"
    ============================================================ */
 :root {
-  --radius: 0.875rem;
+  --radius: 5px;
 
-  /* Soft warm off-white with a faint teal tint */
-  --background: oklch(0.985 0.006 175);
-  --foreground: oklch(0.21 0.02 175);
+  --background: oklch(0.975 0.004 145);
+  --foreground: oklch(0.22 0.02 155);
 
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.21 0.02 175);
+  --card: oklch(0.99 0.002 145);
+  --card-foreground: oklch(0.22 0.02 155);
 
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.21 0.02 175);
+  --popover: oklch(0.99 0.002 145);
+  --popover-foreground: oklch(0.22 0.02 155);
 
-  /* Teal primary — slightly deeper for contrast on white */
-  --primary: oklch(0.55 0.12 178);
-  --primary-foreground: oklch(0.99 0.005 175);
+  /* Clinical surgical-green primary — desaturated, not a bright emerald */
+  --primary: oklch(0.42 0.06 165);
+  --primary-foreground: oklch(0.98 0.004 145);
 
-  --secondary: oklch(0.96 0.008 175);
-  --secondary-foreground: oklch(0.3 0.02 175);
+  --secondary: oklch(0.94 0.006 145);
+  --secondary-foreground: oklch(0.3 0.02 155);
 
-  --muted: oklch(0.96 0.006 175);
-  --muted-foreground: oklch(0.5 0.015 175);
+  --muted: oklch(0.94 0.005 145);
+  --muted-foreground: oklch(0.48 0.015 155);
 
-  /* Coral accent */
-  --accent: oklch(0.68 0.16 45);
-  --accent-foreground: oklch(0.99 0.005 175);
+  /* Reserved strictly for pending/attention states, not brand decoration */
+  --accent: oklch(0.62 0.13 55);
+  --accent-foreground: oklch(0.98 0.004 145);
 
-  --destructive: oklch(0.58 0.22 25);
+  /* "Pulse" red — reserved only for urgent/destructive states */
+  --destructive: oklch(0.53 0.17 25);
 
-  --border: oklch(0.9 0.01 175);
-  --input: oklch(0.92 0.01 175);
-  --ring: oklch(0.55 0.12 178);
+  --border: oklch(0.87 0.006 145);
+  --input: oklch(0.9 0.006 145);
+  --ring: oklch(0.42 0.06 165);
 
-  --chart-1: oklch(0.55 0.12 178);
-  --chart-2: oklch(0.68 0.16 45);
-  --chart-3: oklch(0.6 0.13 145);
-  --chart-4: oklch(0.62 0.1 220);
-  --chart-5: oklch(0.72 0.15 80);
+  --chart-1: oklch(0.42 0.06 165);
+  --chart-2: oklch(0.53 0.17 25);
+  --chart-3: oklch(0.62 0.13 55);
+  --chart-4: oklch(0.5 0.08 230);
+  --chart-5: oklch(0.55 0.04 155);
 }
 
 /* ============================================================
-   DARK THEME (applied when <html> has class="dark")
+   DARK THEME — "monitor glow"
    ============================================================ */
 .dark {
-  --background: oklch(0.16 0.015 200);
-  --foreground: oklch(0.97 0.008 200);
+  --background: oklch(0.15 0.012 165);
+  --foreground: oklch(0.94 0.006 145);
 
-  --card: oklch(0.21 0.018 200);
-  --card-foreground: oklch(0.97 0.008 200);
+  --card: oklch(0.19 0.014 165);
+  --card-foreground: oklch(0.94 0.006 145);
 
-  --popover: oklch(0.21 0.018 200);
-  --popover-foreground: oklch(0.97 0.008 200);
+  --popover: oklch(0.19 0.014 165);
+  --popover-foreground: oklch(0.94 0.006 145);
 
-  --primary: oklch(0.68 0.13 178);
-  --primary-foreground: oklch(0.16 0.02 200);
+  --primary: oklch(0.72 0.1 165);
+  --primary-foreground: oklch(0.15 0.012 165);
 
-  --secondary: oklch(0.27 0.018 200);
-  --secondary-foreground: oklch(0.97 0.008 200);
+  --secondary: oklch(0.25 0.014 165);
+  --secondary-foreground: oklch(0.94 0.006 145);
 
-  --muted: oklch(0.25 0.015 200);
-  --muted-foreground: oklch(0.68 0.015 200);
+  --muted: oklch(0.24 0.012 165);
+  --muted-foreground: oklch(0.65 0.012 155);
 
-  --accent: oklch(0.72 0.16 45);
-  --accent-foreground: oklch(0.16 0.02 200);
+  --accent: oklch(0.72 0.13 55);
+  --accent-foreground: oklch(0.15 0.012 165);
 
-  --destructive: oklch(0.64 0.2 25);
+  --destructive: oklch(0.65 0.18 25);
 
-  --border: oklch(1 0 0 / 8%);
-  --input: oklch(1 0 0 / 10%);
-  --ring: oklch(0.68 0.13 178);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 12%);
+  --ring: oklch(0.72 0.1 165);
 
-  --chart-1: oklch(0.68 0.13 178);
-  --chart-2: oklch(0.72 0.16 45);
-  --chart-3: oklch(0.7 0.13 145);
-  --chart-4: oklch(0.72 0.1 220);
-  --chart-5: oklch(0.75 0.15 80);
+  --chart-1: oklch(0.72 0.1 165);
+  --chart-2: oklch(0.65 0.18 25);
+  --chart-3: oklch(0.72 0.13 55);
+  --chart-4: oklch(0.65 0.09 230);
+  --chart-5: oklch(0.7 0.04 155);
 }
 
 @layer base {
@@ -127,25 +128,21 @@
     color: var(--foreground);
     font-family: var(--font-sans);
     min-height: 100vh;
-    background-image:
-      radial-gradient(at 0% 0%, oklch(0.55 0.12 178 / 0.07) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, oklch(0.68 0.16 45 / 0.05) 0px, transparent 50%);
-    background-attachment: fixed;
     -webkit-font-smoothing: antialiased;
-  }
-  /* In dark mode, the body uses a stronger glow */
-  .dark body {
-    background-image:
-      radial-gradient(at 0% 0%, oklch(0.68 0.13 178 / 0.1) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, oklch(0.72 0.16 45 / 0.07) 0px, transparent 50%);
   }
   h1, h2, h3, h4, h5 {
     font-family: var(--font-heading);
-    font-weight: 700;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  /* Every numeric / data value renders in mono — the throughline of the whole system */
+  .num, time, [data-num] {
+    font-family: var(--font-mono);
+    font-feature-settings: "tnum" 1;
   }
 }
 
-/* Thin scrollbar — theme aware */
+/* Thin scrollbar */
 .scroll-area-thin::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -154,47 +151,64 @@
   background: transparent;
 }
 .scroll-area-thin::-webkit-scrollbar-thumb {
-  background: oklch(0.8 0.01 175);
+  background: var(--border);
   border-radius: 9999px;
 }
-.dark .scroll-area-thin::-webkit-scrollbar-thumb {
-  background: oklch(0.4 0.02 200);
-}
 .scroll-area-thin::-webkit-scrollbar-thumb:hover {
-  background: oklch(0.65 0.04 175);
-}
-.dark .scroll-area-thin::-webkit-scrollbar-thumb:hover {
-  background: oklch(0.55 0.05 200);
+  background: var(--muted-foreground);
 }
 
-/* Subtle grid background — theme aware */
+/* Chart-paper grid — faint ruled lines like a clinical form, not a decorative mesh */
 .bg-grid {
   background-image:
-    linear-gradient(to right, oklch(0.5 0.05 175 / 0.08) 1px, transparent 1px),
-    linear-gradient(to bottom, oklch(0.5 0.05 175 / 0.08) 1px, transparent 1px);
-  background-size: 32px 32px;
-}
-.dark .bg-grid {
-  background-image:
-    linear-gradient(to right, oklch(1 0 0 / 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, oklch(1 0 0 / 0.05) 1px, transparent 1px);
+    linear-gradient(to right, var(--border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--border) 1px, transparent 1px);
+  background-size: 24px 24px;
+  opacity: 0.5;
 }
 
-/* Gradient mesh for hero cards — theme aware */
-.bg-mesh {
-  background-image:
-    radial-gradient(at 20% 10%, oklch(0.55 0.12 178 / 0.12) 0px, transparent 50%),
-    radial-gradient(at 80% 0%, oklch(0.6 0.13 145 / 0.10) 0px, transparent 50%),
-    radial-gradient(at 0% 90%, oklch(0.68 0.16 45 / 0.08) 0px, transparent 50%);
+/* Signature element: ECG / vitals waveform used as a hairline divider */
+.ecg-line {
+  width: 100%;
+  height: 20px;
+  display: block;
 }
-.dark .bg-mesh {
-  background-image:
-    radial-gradient(at 20% 10%, oklch(0.68 0.13 178 / 0.18) 0px, transparent 50%),
-    radial-gradient(at 80% 0%, oklch(0.7 0.13 145 / 0.14) 0px, transparent 50%),
-    radial-gradient(at 0% 90%, oklch(0.72 0.16 45 / 0.12) 0px, transparent 50%);
+.ecg-line path {
+  fill: none;
+  stroke: var(--primary);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.55;
+}
+.ecg-line.pulse path {
+  stroke-dasharray: 340;
+  stroke-dashoffset: 340;
+  animation: ecg-draw 0.9s ease-out forwards;
+}
+@keyframes ecg-draw {
+  to { stroke-dashoffset: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ecg-line.pulse path { animation: none; stroke-dashoffset: 0; }
 }
 
-/* Native date input — calendar icon visible on both themes */
+/* Chart-tab navigation — index tabs on a manila folder, not a pill switcher */
+.chart-tab {
+  position: relative;
+  font-family: var(--font-heading);
+}
+.chart-tab[data-active="true"]::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: var(--primary);
+}
+
+/* Native date input */
 input[type="date"]::-webkit-calendar-picker-indicator {
   cursor: pointer;
 }
@@ -202,19 +216,17 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   filter: invert(0.8);
 }
 
-/* Native select option styling — theme aware */
 select option {
   background: var(--popover);
   color: var(--popover-foreground);
 }
 
-/* Smooth theme transition */
 html.theme-transition,
 html.theme-transition *,
 html.theme-transition *::before,
 html.theme-transition *::after {
   transition:
-    background-color 0.25s ease,
-    border-color 0.25s ease,
-    color 0.25s ease !important;
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease !important;
 }
