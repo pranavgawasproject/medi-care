@@ -13,4 +13,4 @@ jobs:
       - name: Ping Medi-Care Supabase project
         run: |
           curl -sS -o /dev/null -w "Medi-Care: HTTP %{http_code} (expect 200 or 401)\n" \
-            "https://afrxbolcukhztlfhccud.supabase.co/rest/v1/"
+            "https://afrxbolcukhztlfhccud.supabase.co/rest/v1/" || true
