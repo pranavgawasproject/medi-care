@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "server": "nodemon backend/server.js",
-    "test": "node frontend/test_supabase.js"
+    "test": "node frontend/test_supabase.js && node frontend/__tests__/medicationUtils.test.js"
   },
   "type": "module",
   "keywords": [],
