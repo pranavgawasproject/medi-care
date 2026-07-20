@@ -119,5 +119,26 @@ export function formatDosageInstructions(medName, dosageMg, frequencyStr, instru
   return `${medName.trim()}${dose ? ' ' + dose : ''} (${freq})${notes}`.trim();
 }
 
+export function calculateNextMedicationReminder(schedules = [], currentTimeStr = '') {
+  if (!Array.isArray(schedules) || schedules.length === 0) {
+    return { nextDose: null, message: 'No scheduled doses' };
+  }
+  const valid = schedules.filter(s => s && typeof s.time === 'string' && s.time.trim());
+  if (valid.length === 0) return { nextDose: null, message: 'No valid dose times' };
+
+  const sorted = [...valid].sort((a, b) => a.time.localeCompare(b.time));
+  if (!currentTimeStr) {
+    return { nextDose: sorted[0], message: `Next dose at ${sorted[0].time}` };
+  }
+
+  const upcoming = sorted.find(s => s.time > currentTimeStr);
+  const selected = upcoming || sorted[0];
+  return {
+    nextDose: selected,
+    message: upcoming ? `Next dose at ${selected.time}` : `Tomorrow at ${selected.time}`
+  };
+}
+
+
 
 

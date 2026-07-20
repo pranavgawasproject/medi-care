@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 import test from 'node:test';
-import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions } from '../src/utils/medicationUtils.js';
+import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder } from '../src/utils/medicationUtils.js';
 
 test('parseFrequencyToDailyCount', () => {
   assert.strictEqual(parseFrequencyToDailyCount('once daily'), 1);
@@ -8,7 +8,7 @@ test('parseFrequencyToDailyCount', () => {
   assert.strictEqual(parseFrequencyToDailyCount('thrice daily (TID)'), 3);
   assert.strictEqual(parseFrequencyToDailyCount('4x daily'), 4);
   assert.strictEqual(parseFrequencyToDailyCount(null), 1);
-});
+ });
 
 test('calculateMedicationDurationDays', () => {
   assert.strictEqual(calculateMedicationDurationDays('2026-07-01', '2026-07-10'), 10);
@@ -62,6 +62,17 @@ test('formatDosageInstructions', () => {
   assert.strictEqual(formatDosageInstructions('Paracetamol', 0, ''), 'Paracetamol (as prescribed)');
   assert.strictEqual(formatDosageInstructions(null, 500, 'once daily'), '');
 });
+
+test('calculateNextMedicationReminder', () => {
+  const schedules = [{ name: 'Aspirin', time: '08:00' }, { name: 'Vitamin D', time: '20:00' }];
+  const res = calculateNextMedicationReminder(schedules, '12:00');
+  assert.strictEqual(res.nextDose.name, 'Vitamin D');
+  assert.ok(res.message.includes('20:00'));
+
+  const empty = calculateNextMedicationReminder([]);
+  assert.strictEqual(empty.nextDose, null);
+});
+
 
 
 
