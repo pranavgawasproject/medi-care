@@ -31,3 +31,49 @@ export function validateDosageInput(dosage, maxAllowedMg = 1000) {
   }
   return { valid: true, message: 'Dosage valid' };
 }
+
+export function calculateRefillDate(startDateStr, totalPills, dailyDoseCount) {
+  if (!startDateStr || typeof totalPills !== 'number' || totalPills <= 0 || typeof dailyDoseCount !== 'number' || dailyDoseCount <= 0) {
+    return null;
+  }
+  const start = new Date(startDateStr);
+  if (isNaN(start.getTime())) return null;
+
+  const daysSupply = Math.floor(totalPills / dailyDoseCount);
+  const refillDate = new Date(start);
+  refillDate.setDate(refillDate.getDate() + daysSupply);
+  return refillDate.toISOString().split('T')[0];
+}
+
+export function checkPotentialDrugInteraction(medList = []) {
+  if (!Array.isArray(medList) || medList.length < 2) {
+    return { hasInteraction: false, warnings: [] };
+  }
+
+  const normalized = medList.map(m => (typeof m === 'string' ? m : m.name || '').toLowerCase().trim());
+  const warnings = [];
+
+  const knownPairs = [
+    { pair: ['aspirin', 'warfarin'], severity: 'high', note: 'Increased bleeding risk when combining antiplatelet and anticoagulant agents.' },
+    { pair: ['ibuprofen', 'aspirin'], severity: 'moderate', note: 'Ibuprofen may decrease the cardioprotective effect of aspirin.' },
+    { pair: ['lisinopril', 'spironolactone'], severity: 'high', note: 'Risk of hyperkalemia (high potassium levels).' },
+    { pair: ['metformin', 'contrast'], severity: 'high', note: 'Risk of lactic acidosis with iodinated contrast media.' }
+  ];
+
+  for (const rule of knownPairs) {
+    const [medA, medB] = rule.pair;
+    if (normalized.some(m => m.includes(medA)) && normalized.some(m => m.includes(medB))) {
+      warnings.push({
+        pair: [medA, medB],
+        severity: rule.severity,
+        note: rule.note
+      });
+    }
+  }
+
+  return {
+    hasInteraction: warnings.length > 0,
+    warnings
+  };
+}
+
