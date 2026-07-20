@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 import test from 'node:test';
-import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction } from '../src/utils/medicationUtils.js';
+import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes } from '../src/utils/medicationUtils.js';
 
 test('parseFrequencyToDailyCount', () => {
   assert.strictEqual(parseFrequencyToDailyCount('once daily'), 1);
@@ -38,4 +38,23 @@ test('checkPotentialDrugInteraction', () => {
   assert.strictEqual(resultSafe.hasInteraction, false);
   assert.strictEqual(resultSafe.warnings.length, 0);
 });
+
+test('calculateAdherenceRate', () => {
+  const logs = [{ taken: true }, { taken: true }, { taken: false }, { taken: true }];
+  const res = calculateAdherenceRate(logs);
+  assert.strictEqual(res.percentage, 75);
+  assert.strictEqual(res.status, 'Good');
+
+  const emptyRes = calculateAdherenceRate([]);
+  assert.strictEqual(emptyRes.percentage, 0);
+  assert.strictEqual(emptyRes.status, 'No Data');
+});
+
+test('generateDoseScheduleTimes', () => {
+  const times2 = generateDoseScheduleTimes(2, 8);
+  assert.strictEqual(times2.length, 2);
+  assert.strictEqual(times2[0], '08:00 AM');
+  assert.strictEqual(times2[1], '04:00 PM');
+});
+
 

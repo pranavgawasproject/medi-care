@@ -77,3 +77,38 @@ export function checkPotentialDrugInteraction(medList = []) {
   };
 }
 
+export function calculateAdherenceRate(doseLogs = []) {
+  if (!Array.isArray(doseLogs) || doseLogs.length === 0) {
+    return { percentage: 0, taken: 0, total: 0, status: 'No Data' };
+  }
+
+  const total = doseLogs.length;
+  const taken = doseLogs.filter(log => log && log.taken === true).length;
+  const percentage = Math.round((taken / total) * 100);
+
+  let status = 'Needs Improvement';
+  if (percentage >= 90) status = 'Excellent';
+  else if (percentage >= 75) status = 'Good';
+
+  return { percentage, taken, total, status };
+}
+
+export function generateDoseScheduleTimes(dailyFrequency = 1, startHour = 8) {
+  const count = Math.max(1, Math.min(6, typeof dailyFrequency === 'number' ? dailyFrequency : 1));
+  const baseHour = Math.max(0, Math.min(23, typeof startHour === 'number' ? startHour : 8));
+
+  const interval = Math.floor(16 / Math.max(1, count));
+  const times = [];
+
+  for (let i = 0; i < count; i++) {
+    const hour = (baseHour + i * interval) % 24;
+    const period = hour >= 12 ? 'PM' : 'AM';
+    const displayHour = hour % 12 === 0 ? 12 : hour % 12;
+    const formatted = `${displayHour.toString().padStart(2, '0')}:00 ${period}`;
+    times.push(formatted);
+  }
+
+  return times;
+}
+
+
