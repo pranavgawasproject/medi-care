@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 import test from 'node:test';
-import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder } from '../src/utils/medicationUtils.js';
+import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency } from '../src/utils/medicationUtils.js';
 
 test('parseFrequencyToDailyCount', () => {
   assert.strictEqual(parseFrequencyToDailyCount('once daily'), 1);
@@ -72,6 +72,24 @@ test('calculateNextMedicationReminder', () => {
   const empty = calculateNextMedicationReminder([]);
   assert.strictEqual(empty.nextDose, null);
 });
+
+test('calculateMedicationRefillUrgency', () => {
+  const critical = calculateMedicationRefillUrgency(3, 2, 5);
+  assert.strictEqual(critical.daysRemaining, 1);
+  assert.strictEqual(critical.urgency, 'CRITICAL');
+  assert.strictEqual(critical.needsRefill, true);
+
+  const warning = calculateMedicationRefillUrgency(8, 2, 5);
+  assert.strictEqual(warning.daysRemaining, 4);
+  assert.strictEqual(warning.urgency, 'WARNING');
+  assert.strictEqual(warning.needsRefill, true);
+
+  const ok = calculateMedicationRefillUrgency(20, 2, 5);
+  assert.strictEqual(ok.daysRemaining, 10);
+  assert.strictEqual(ok.urgency, 'OK');
+  assert.strictEqual(ok.needsRefill, false);
+});
+
 
 
 

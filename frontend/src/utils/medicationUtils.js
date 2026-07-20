@@ -139,6 +139,31 @@ export function calculateNextMedicationReminder(schedules = [], currentTimeStr =
   };
 }
 
+export function calculateMedicationRefillUrgency(currentPills, dailyDoseCount = 1, thresholdDays = 5) {
+  if (typeof currentPills !== 'number' || isNaN(currentPills) || currentPills < 0) {
+    return { daysRemaining: 0, urgency: 'CRITICAL', needsRefill: true };
+  }
+  const daily = Math.max(1, typeof dailyDoseCount === 'number' && !isNaN(dailyDoseCount) ? dailyDoseCount : 1);
+  const thresh = Math.max(1, typeof thresholdDays === 'number' && !isNaN(thresholdDays) ? thresholdDays : 5);
+
+  const daysRemaining = Math.floor(currentPills / daily);
+  const needsRefill = daysRemaining <= thresh;
+
+  let urgency = 'OK';
+  if (daysRemaining <= 2) {
+    urgency = 'CRITICAL';
+  } else if (daysRemaining <= thresh) {
+    urgency = 'WARNING';
+  }
+
+  return {
+    daysRemaining,
+    urgency,
+    needsRefill
+  };
+}
+
+
 
 
 
