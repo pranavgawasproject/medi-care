@@ -111,4 +111,13 @@ export function generateDoseScheduleTimes(dailyFrequency = 1, startHour = 8) {
   return times;
 }
 
+export function formatDosageInstructions(medName, dosageMg, frequencyStr, instructions = '') {
+  if (!medName || typeof medName !== 'string') return '';
+  const dose = typeof dosageMg === 'number' && dosageMg > 0 ? `${dosageMg}mg` : '';
+  const freq = typeof frequencyStr === 'string' && frequencyStr.trim() ? frequencyStr.trim() : 'as prescribed';
+  const notes = typeof instructions === 'string' && instructions.trim() ? ` — Note: ${instructions.trim()}` : '';
+  return `${medName.trim()}${dose ? ' ' + dose : ''} (${freq})${notes}`.trim();
+}
+
+
 

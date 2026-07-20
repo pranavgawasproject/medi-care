@@ -5,6 +5,7 @@
   "main": "server.js",
   "scripts": {
     "server": "nodemon backend/server.js",
+    "build": "npm --prefix frontend run build",
     "test": "node frontend/test_supabase.js && node frontend/__tests__/medicationUtils.test.js"
   },
   "type": "module",
