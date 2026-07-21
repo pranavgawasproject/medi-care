@@ -163,6 +163,34 @@ export function calculateMedicationRefillUrgency(currentPills, dailyDoseCount = 
   };
 }
 
+export function calculateDailyDoseComplianceScore(doseLogs = [], targetDoseCount = 1) {
+  if (!Array.isArray(doseLogs) || doseLogs.length === 0) {
+    return { scorePercentage: 0, takenCount: 0, targetCount: Math.max(1, targetDoseCount), isCompliant: false };
+  }
+
+  const target = Math.max(1, typeof targetDoseCount === 'number' && !isNaN(targetDoseCount) ? targetDoseCount : 1);
+  const takenCount = doseLogs.filter(log => log && (log.taken === true || log.status === 'TAKEN')).length;
+  const scorePercentage = Math.min(100, Math.round((takenCount / target) * 100));
+
+  return {
+    scorePercentage,
+    takenCount,
+    targetCount: target,
+    isCompliant: scorePercentage >= 80
+  };
+}
+
+export function formatPrescriptionSummary(medication = {}) {
+  if (!medication || typeof medication !== 'object') return 'Invalid medication entry';
+  const name = (medication.name || 'Unnamed Medication').trim();
+  const dose = medication.dosage ? ` - ${medication.dosage}` : '';
+  const freq = medication.frequency ? ` (${medication.frequency})` : '';
+  const refills = typeof medication.refills === 'number' ? ` | Refills left: ${medication.refills}` : '';
+
+  return `${name}${dose}${freq}${refills}`.trim();
+}
+
+
 
 
 

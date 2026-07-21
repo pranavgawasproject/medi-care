@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 import test from 'node:test';
-import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency } from '../src/utils/medicationUtils.js';
+import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary } from '../src/utils/medicationUtils.js';
 
 test('parseFrequencyToDailyCount', () => {
   assert.strictEqual(parseFrequencyToDailyCount('once daily'), 1);
@@ -89,6 +89,22 @@ test('calculateMedicationRefillUrgency', () => {
   assert.strictEqual(ok.urgency, 'OK');
   assert.strictEqual(ok.needsRefill, false);
 });
+
+test('calculateDailyDoseComplianceScore', () => {
+  const logs = [{ taken: true }, { taken: true }, { taken: false }];
+  const res = calculateDailyDoseComplianceScore(logs, 3);
+  assert.strictEqual(res.scorePercentage, 67);
+  assert.strictEqual(res.isCompliant, false);
+
+  const empty = calculateDailyDoseComplianceScore([]);
+  assert.strictEqual(empty.scorePercentage, 0);
+});
+
+test('formatPrescriptionSummary', () => {
+  const med = { name: 'Metformin', dosage: '500mg', frequency: 'twice daily', refills: 3 };
+  assert.strictEqual(formatPrescriptionSummary(med), 'Metformin - 500mg (twice daily) | Refills left: 3');
+});
+
 
 
 
