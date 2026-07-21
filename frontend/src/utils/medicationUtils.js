@@ -240,6 +240,35 @@ export function calculatePediatricDoseByWeight(adultDoseMg, childWeightKg, adult
   };
 }
 
+export function calculateEstimatedOutofPocketMedicationCost({ retailPriceUsd = 0, copayUsd = null, insuranceCoveragePct = 80, isGeneric = false, genericDiscountPct = 50 } = {}) {
+  if (typeof retailPriceUsd !== 'number' || isNaN(retailPriceUsd) || retailPriceUsd <= 0) {
+    return { valid: false, outOfPocketCostUsd: 0, savingsUsd: 0, message: 'Invalid retail price' };
+  }
+
+  const discount = isGeneric && typeof genericDiscountPct === 'number' && genericDiscountPct >= 0 ? (genericDiscountPct / 100) : 0;
+  const effectivePrice = Math.max(0, retailPriceUsd * (1 - discount));
+
+  let outOfPocketCostUsd = effectivePrice;
+
+  if (typeof copayUsd === 'number' && copayUsd >= 0) {
+    outOfPocketCostUsd = Math.min(effectivePrice, copayUsd);
+  } else if (typeof insuranceCoveragePct === 'number' && insuranceCoveragePct >= 0) {
+    const cov = Math.min(100, insuranceCoveragePct) / 100;
+    outOfPocketCostUsd = Math.round(effectivePrice * (1 - cov) * 100) / 100;
+  }
+
+  const savingsUsd = Math.round((retailPriceUsd - outOfPocketCostUsd) * 100) / 100;
+
+  return {
+    valid: true,
+    effectivePrice: Math.round(effectivePrice * 100) / 100,
+    outOfPocketCostUsd,
+    savingsUsd,
+    isGeneric: Boolean(isGeneric)
+  };
+}
+
+
 
 
 

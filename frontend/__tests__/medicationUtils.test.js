@@ -1,6 +1,7 @@
 import assert from 'node:assert';
 import test from 'node:test';
-import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight } from '../src/utils/medicationUtils.js';
+import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost } from '../src/utils/medicationUtils.js';
+
 
 test('parseFrequencyToDailyCount', () => {
   assert.strictEqual(parseFrequencyToDailyCount('once daily'), 1);
@@ -125,6 +126,19 @@ test('calculatePediatricDoseByWeight', () => {
   const invalid = calculatePediatricDoseByWeight(0, 35);
   assert.strictEqual(invalid.valid, false);
 });
+
+test('calculateEstimatedOutofPocketMedicationCost', () => {
+  const brand = calculateEstimatedOutofPocketMedicationCost({ retailPriceUsd: 100, copayUsd: 15 });
+  assert.strictEqual(brand.valid, true);
+  assert.strictEqual(brand.outOfPocketCostUsd, 15);
+  assert.strictEqual(brand.savingsUsd, 85);
+
+  const generic = calculateEstimatedOutofPocketMedicationCost({ retailPriceUsd: 100, isGeneric: true, genericDiscountPct: 50, insuranceCoveragePct: 80 });
+  assert.strictEqual(generic.effectivePrice, 50);
+  assert.strictEqual(generic.outOfPocketCostUsd, 10);
+  assert.strictEqual(generic.savingsUsd, 90);
+});
+
 
 
 
