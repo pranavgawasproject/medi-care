@@ -190,6 +190,35 @@ export function formatPrescriptionSummary(medication = {}) {
   return `${name}${dose}${freq}${refills}`.trim();
 }
 
+export function calculateBMIAndHealthRiskCategory(weightKg, heightCm) {
+  if (typeof weightKg !== 'number' || isNaN(weightKg) || weightKg <= 0 ||
+      typeof heightCm !== 'number' || isNaN(heightCm) || heightCm <= 0) {
+    return { bmi: 0, category: 'Invalid Input', riskLevel: 'Unknown' };
+  }
+
+  const heightM = heightCm / 100;
+  const bmi = Math.round((weightKg / (heightM * heightM)) * 10) / 10;
+
+  let category = 'Normal weight';
+  let riskLevel = 'Low';
+
+  if (bmi < 18.5) {
+    category = 'Underweight';
+    riskLevel = 'Moderate';
+  } else if (bmi >= 18.5 && bmi < 25) {
+    category = 'Normal weight';
+    riskLevel = 'Low';
+  } else if (bmi >= 25 && bmi < 30) {
+    category = 'Overweight';
+    riskLevel = 'Increased';
+  } else {
+    category = 'Obese';
+    riskLevel = 'High';
+  }
+
+  return { bmi, category, riskLevel };
+}
+
 
 
 

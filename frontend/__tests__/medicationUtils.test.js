@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 import test from 'node:test';
-import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary } from '../src/utils/medicationUtils.js';
+import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory } from '../src/utils/medicationUtils.js';
 
 test('parseFrequencyToDailyCount', () => {
   assert.strictEqual(parseFrequencyToDailyCount('once daily'), 1);
@@ -103,6 +103,17 @@ test('calculateDailyDoseComplianceScore', () => {
 test('formatPrescriptionSummary', () => {
   const med = { name: 'Metformin', dosage: '500mg', frequency: 'twice daily', refills: 3 };
   assert.strictEqual(formatPrescriptionSummary(med), 'Metformin - 500mg (twice daily) | Refills left: 3');
+});
+
+test('calculateBMIAndHealthRiskCategory', () => {
+  const normal = calculateBMIAndHealthRiskCategory(70, 175);
+  assert.strictEqual(normal.bmi, 22.9);
+  assert.strictEqual(normal.category, 'Normal weight');
+
+  const overweight = calculateBMIAndHealthRiskCategory(85, 175);
+  assert.strictEqual(overweight.bmi, 27.8);
+  assert.strictEqual(overweight.category, 'Overweight');
+  assert.strictEqual(overweight.riskLevel, 'Increased');
 });
 
 
