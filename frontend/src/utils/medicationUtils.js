@@ -219,6 +219,28 @@ export function calculateBMIAndHealthRiskCategory(weightKg, heightCm) {
   return { bmi, category, riskLevel };
 }
 
+export function calculatePediatricDoseByWeight(adultDoseMg, childWeightKg, adultStandardWeightKg = 70) {
+  if (typeof adultDoseMg !== 'number' || isNaN(adultDoseMg) || adultDoseMg <= 0 ||
+      typeof childWeightKg !== 'number' || isNaN(childWeightKg) || childWeightKg <= 0) {
+    return { valid: false, recommendedDoseMg: 0, percentageOfAdultDose: 0, message: 'Invalid weight or adult dosage input' };
+  }
+
+  const stdWeight = typeof adultStandardWeightKg === 'number' && adultStandardWeightKg > 0 ? adultStandardWeightKg : 70;
+  const ratio = Math.min(1.0, childWeightKg / stdWeight);
+  const recommendedDoseMg = Math.round((adultDoseMg * ratio) * 10) / 10;
+  const percentageOfAdultDose = Math.round(ratio * 100);
+
+  return {
+    valid: true,
+    recommendedDoseMg,
+    percentageOfAdultDose,
+    childWeightKg,
+    adultDoseMg,
+    message: `Recommended pediatric dosage: ${recommendedDoseMg}mg (${percentageOfAdultDose}% of adult dose)`
+  };
+}
+
+
 
 
 

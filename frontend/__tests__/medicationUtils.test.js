@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 import test from 'node:test';
-import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory } from '../src/utils/medicationUtils.js';
+import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight } from '../src/utils/medicationUtils.js';
 
 test('parseFrequencyToDailyCount', () => {
   assert.strictEqual(parseFrequencyToDailyCount('once daily'), 1);
@@ -115,6 +115,17 @@ test('calculateBMIAndHealthRiskCategory', () => {
   assert.strictEqual(overweight.category, 'Overweight');
   assert.strictEqual(overweight.riskLevel, 'Increased');
 });
+
+test('calculatePediatricDoseByWeight', () => {
+  const child = calculatePediatricDoseByWeight(500, 35, 70); // 35kg / 70kg = 50%
+  assert.strictEqual(child.valid, true);
+  assert.strictEqual(child.recommendedDoseMg, 250);
+  assert.strictEqual(child.percentageOfAdultDose, 50);
+
+  const invalid = calculatePediatricDoseByWeight(0, 35);
+  assert.strictEqual(invalid.valid, false);
+});
+
 
 
 
