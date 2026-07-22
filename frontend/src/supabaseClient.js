@@ -9,7 +9,20 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 const isConfigured = Boolean(supabaseUrl && supabaseAnonKey)
 
 export const supabase = isConfigured
-  ? createClient(supabaseUrl, supabaseAnonKey)
+  ? createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+      },
+      realtime: {
+        params: {
+          eventsPerSecond: 10,
+        },
+      },
+      global: {
+        headers: { 'x-my-custom-header': 'medi-care' },
+      },
+    })
   : new Proxy(
       {},
       {
