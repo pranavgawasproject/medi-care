@@ -1,6 +1,7 @@
 import assert from 'node:assert';
 import test from 'node:test';
-import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel } from '../src/utils/medicationUtils.js';
+import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget } from '../src/utils/medicationUtils.js';
+
 
 
 test('parseFrequencyToDailyCount', () => {
@@ -149,6 +150,23 @@ test('calculatePatientVitalSignsAlertLevel', () => {
   assert.strictEqual(critical.requiresImmediateAttention, true);
   assert.ok(critical.warnings.length >= 2);
 });
+
+test('calculatePatientWaterHydrationTarget', () => {
+  const norm = calculatePatientWaterHydrationTarget(70, 30, false);
+  assert.strictEqual(norm.valid, true);
+  assert.strictEqual(norm.totalMl, 2800);
+  assert.strictEqual(norm.targetLiters, 2.8);
+  assert.strictEqual(norm.targetGlasses, 11);
+
+  const hot = calculatePatientWaterHydrationTarget(70, 60, true);
+  assert.strictEqual(hot.valid, true);
+  assert.strictEqual(hot.totalMl, 3650);
+
+  const invalid = calculatePatientWaterHydrationTarget(0);
+  assert.strictEqual(invalid.valid, false);
+  assert.strictEqual(invalid.targetLiters, 0);
+});
+
 
 
 

@@ -315,3 +315,26 @@ export function calculatePatientVitalSignsAlertLevel({ heartRateBpm, systolicBp,
     warnings
   };
 }
+
+export function calculatePatientWaterHydrationTarget(weightKg, activityMinutes = 0, isHotClimate = false) {
+  if (typeof weightKg !== 'number' || isNaN(weightKg) || weightKg <= 0) {
+    return { valid: false, targetLiters: 0, targetGlasses: 0, message: 'Invalid body weight input' };
+  }
+
+  const baseMl = weightKg * 35; // 35 ml per kg body weight
+  const activityMl = (Math.max(0, typeof activityMinutes === 'number' ? activityMinutes : 0) / 30) * 350; // 350 ml per 30 mins activity
+  const climateMl = isHotClimate ? 500 : 0;
+
+  const totalMl = Math.round(baseMl + activityMl + climateMl);
+  const targetLiters = Math.round((totalMl / 1000) * 10) / 10;
+  const targetGlasses = Math.round(totalMl / 250);
+
+  return {
+    valid: true,
+    totalMl,
+    targetLiters,
+    targetGlasses,
+    message: `Daily fluid target: ${targetLiters}L (${targetGlasses} glasses)`
+  };
+}
+
