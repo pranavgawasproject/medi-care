@@ -268,10 +268,50 @@ export function calculateEstimatedOutofPocketMedicationCost({ retailPriceUsd = 0
   };
 }
 
+export function calculatePatientVitalSignsAlertLevel({ heartRateBpm, systolicBp, diastolicBp, oxygenSaturationPct } = {}) {
+  if (
+    typeof heartRateBpm !== 'number' || isNaN(heartRateBpm) || heartRateBpm <= 0 ||
+    typeof systolicBp !== 'number' || isNaN(systolicBp) || systolicBp <= 0 ||
+    typeof diastolicBp !== 'number' || isNaN(diastolicBp) || diastolicBp <= 0 ||
+    typeof oxygenSaturationPct !== 'number' || isNaN(oxygenSaturationPct) || oxygenSaturationPct <= 0
+  ) {
+    return { alertLevel: 'UNKNOWN', requiresImmediateAttention: false, warnings: ['Invalid or incomplete vital signs readings'] };
+  }
 
+  const warnings = [];
 
+  if (oxygenSaturationPct < 90) {
+    warnings.push(`Severe hypoxia detected (${oxygenSaturationPct}% SpO2)`);
+  } else if (oxygenSaturationPct < 95) {
+    warnings.push(`Mild hypoxia detected (${oxygenSaturationPct}% SpO2)`);
+  }
 
+  if (systolicBp >= 180 || diastolicBp >= 120) {
+    warnings.push(`Hypertensive crisis level (${systolicBp}/${diastolicBp} mmHg)`);
+  } else if (systolicBp >= 140 || diastolicBp >= 90) {
+    warnings.push(`Stage 2 Hypertension (${systolicBp}/${diastolicBp} mmHg)`);
+  } else if (systolicBp >= 130 || diastolicBp >= 80) {
+    warnings.push(`Stage 1 Hypertension (${systolicBp}/${diastolicBp} mmHg)`);
+  }
 
+  if (heartRateBpm > 120) {
+    warnings.push(`Tachycardia detected (${heartRateBpm} BPM)`);
+  } else if (heartRateBpm < 50) {
+    warnings.push(`Bradycardia detected (${heartRateBpm} BPM)`);
+  }
 
+  let alertLevel = 'NORMAL';
+  if (oxygenSaturationPct < 90 || systolicBp >= 180 || diastolicBp >= 120) {
+    alertLevel = 'CRITICAL_ALERT';
+  } else if (oxygenSaturationPct < 95 || systolicBp >= 140 || diastolicBp >= 90 || heartRateBpm > 120 || heartRateBpm < 50) {
+    alertLevel = 'HIGH_RISK';
+  } else if (warnings.length > 0) {
+    alertLevel = 'ELEVATED';
+  }
 
-
+  return {
+    alertLevel,
+    requiresImmediateAttention: alertLevel === 'CRITICAL_ALERT' || alertLevel === 'HIGH_RISK',
+    warnings
+  };
+}

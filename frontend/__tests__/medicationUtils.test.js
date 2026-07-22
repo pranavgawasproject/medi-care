@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 import test from 'node:test';
-import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost } from '../src/utils/medicationUtils.js';
+import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel } from '../src/utils/medicationUtils.js';
 
 
 test('parseFrequencyToDailyCount', () => {
@@ -137,6 +137,17 @@ test('calculateEstimatedOutofPocketMedicationCost', () => {
   assert.strictEqual(generic.effectivePrice, 50);
   assert.strictEqual(generic.outOfPocketCostUsd, 10);
   assert.strictEqual(generic.savingsUsd, 90);
+});
+
+test('calculatePatientVitalSignsAlertLevel', () => {
+  const normal = calculatePatientVitalSignsAlertLevel({ heartRateBpm: 72, systolicBp: 118, diastolicBp: 78, oxygenSaturationPct: 98 });
+  assert.strictEqual(normal.alertLevel, 'NORMAL');
+  assert.strictEqual(normal.requiresImmediateAttention, false);
+
+  const critical = calculatePatientVitalSignsAlertLevel({ heartRateBpm: 130, systolicBp: 185, diastolicBp: 125, oxygenSaturationPct: 88 });
+  assert.strictEqual(critical.alertLevel, 'CRITICAL_ALERT');
+  assert.strictEqual(critical.requiresImmediateAttention, true);
+  assert.ok(critical.warnings.length >= 2);
 });
 
 
