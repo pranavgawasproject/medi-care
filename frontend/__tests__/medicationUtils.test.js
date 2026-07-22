@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 import test from 'node:test';
-import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget } from '../src/utils/medicationUtils.js';
+import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore } from '../src/utils/medicationUtils.js';
 
 
 
@@ -165,6 +165,19 @@ test('calculatePatientWaterHydrationTarget', () => {
   const invalid = calculatePatientWaterHydrationTarget(0);
   assert.strictEqual(invalid.valid, false);
   assert.strictEqual(invalid.targetLiters, 0);
+});
+
+test('calculateMedicationAdherenceRiskScore', () => {
+  const highRisk = calculateMedicationAdherenceRiskScore({ missedDoses30Days: 7, refillDelayDays: 5, activeMedicationsCount: 5 });
+  assert.strictEqual(highRisk.riskLevel, 'HIGH');
+  assert.strictEqual(highRisk.isHighRisk, true);
+  assert.ok(highRisk.riskScore >= 60);
+  assert.ok(highRisk.riskFactors.length >= 3);
+
+  const lowRisk = calculateMedicationAdherenceRiskScore({ missedDoses30Days: 0, refillDelayDays: 0, activeMedicationsCount: 1 });
+  assert.strictEqual(lowRisk.riskLevel, 'LOW');
+  assert.strictEqual(lowRisk.isHighRisk, false);
+  assert.strictEqual(lowRisk.riskScore, 0);
 });
 
 

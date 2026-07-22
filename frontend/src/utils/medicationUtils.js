@@ -338,3 +338,62 @@ export function calculatePatientWaterHydrationTarget(weightKg, activityMinutes =
   };
 }
 
+export function calculateMedicationAdherenceRiskScore({ missedDoses30Days = 0, refillDelayDays = 0, activeMedicationsCount = 1 } = {}) {
+  const missed = typeof missedDoses30Days === 'number' && !isNaN(missedDoses30Days) ? Math.max(0, missedDoses30Days) : 0;
+  const delay = typeof refillDelayDays === 'number' && !isNaN(refillDelayDays) ? Math.max(0, refillDelayDays) : 0;
+  const count = typeof activeMedicationsCount === 'number' && !isNaN(activeMedicationsCount) ? Math.max(1, activeMedicationsCount) : 1;
+
+  let riskScore = 0;
+  const riskFactors = [];
+
+  // Missed doses weight (up to 50 pts)
+  if (missed >= 6) {
+    riskScore += 50;
+    riskFactors.push('High frequency of missed doses (6+ in 30 days)');
+  } else if (missed >= 3) {
+    riskScore += 30;
+    riskFactors.push('Moderate missed doses (3-5 in 30 days)');
+  } else if (missed >= 1) {
+    riskScore += 10;
+    riskFactors.push('Occasional missed dose');
+  }
+
+  // Refill delay weight (up to 30 pts)
+  if (delay >= 7) {
+    riskScore += 30;
+    riskFactors.push('Severe refill delay (7+ days elapsed)');
+  } else if (delay >= 3) {
+    riskScore += 15;
+    riskFactors.push('Moderate refill delay (3-6 days)');
+  }
+
+  // Polypharmacy complexity weight (up to 20 pts)
+  if (count >= 5) {
+    riskScore += 20;
+    riskFactors.push('Polypharmacy complexity (5+ active prescriptions)');
+  } else if (count >= 3) {
+    riskScore += 10;
+    riskFactors.push('Multiple active prescriptions (3-4)');
+  }
+
+  riskScore = Math.min(100, riskScore);
+
+  let riskLevel = 'LOW';
+  let recommendation = 'Maintain current reminder schedule.';
+
+  if (riskScore >= 60) {
+    riskLevel = 'HIGH';
+    recommendation = 'Schedule pharmacist follow-up and enable automated SMS / Push refill reminders.';
+  } else if (riskScore >= 30) {
+    riskLevel = 'MODERATE';
+    recommendation = 'Recommend smart pillbox organizer and custom notification sound.';
+  }
+
+  return {
+    riskScore,
+    riskLevel,
+    riskFactors,
+    recommendation,
+    isHighRisk: riskLevel === 'HIGH'
+  };
+}
