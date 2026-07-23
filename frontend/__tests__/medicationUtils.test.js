@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 import test from 'node:test';
-import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore, calculateMedicationInteractionRiskScore } from '../src/utils/medicationUtils.js';
+import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore, calculateMedicationInteractionRiskScore, calculatePatientVitalSignStabilityIndex } from '../src/utils/medicationUtils.js';
 
 
 
@@ -268,6 +268,32 @@ test('calculateMedicationInteractionRiskScore', () => {
   assert.strictEqual(res.hasAllergyConflict, true);
   assert.ok(res.interactionRiskScore >= 60);
 });
+
+test('calculatePatientVitalSignStabilityIndex', () => {
+  const res = calculatePatientVitalSignStabilityIndex({
+    systolicBp: 120,
+    diastolicBp: 80,
+    heartRate: 72,
+    oxygenSatPercentage: 98,
+    temperatureC: 37.0
+  });
+  assert.strictEqual(res.valid, true);
+  assert.strictEqual(res.stabilityIndex, 100);
+  assert.strictEqual(res.clinicalTier, 'OPTIMAL');
+  assert.strictEqual(res.isStable, true);
+
+  const resAbnormal = calculatePatientVitalSignStabilityIndex({
+    systolicBp: 155,
+    diastolicBp: 95,
+    heartRate: 110,
+    oxygenSatPercentage: 92,
+    temperatureC: 38.5
+  });
+  assert.strictEqual(resAbnormal.valid, true);
+  assert.strictEqual(resAbnormal.clinicalTier, 'CRITICAL');
+  assert.strictEqual(resAbnormal.isStable, false);
+});
+
 
 
 

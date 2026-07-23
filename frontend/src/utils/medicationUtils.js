@@ -627,6 +627,75 @@ export function calculateMedicationInteractionRiskScore({
   };
 }
 
+export function calculatePatientVitalSignStabilityIndex({
+  systolicBp = 120,
+  diastolicBp = 80,
+  heartRate = 72,
+  oxygenSatPercentage = 98,
+  temperatureC = 37.0
+} = {}) {
+  if (typeof systolicBp !== 'number' || systolicBp <= 0 || isNaN(systolicBp)) {
+    return { valid: false, error: 'Systolic blood pressure must be a positive number' };
+  }
+  if (typeof diastolicBp !== 'number' || diastolicBp <= 0 || isNaN(diastolicBp)) {
+    return { valid: false, error: 'Diastolic blood pressure must be a positive number' };
+  }
+
+  let stabilityIndex = 100;
+  const flags = [];
+
+  if (systolicBp > 140 || systolicBp < 90) {
+    stabilityIndex -= 20;
+    flags.push(systolicBp > 140 ? 'High Systolic BP' : 'Low Systolic BP');
+  }
+
+  if (diastolicBp > 90 || diastolicBp < 60) {
+    stabilityIndex -= 15;
+    flags.push(diastolicBp > 90 ? 'High Diastolic BP' : 'Low Diastolic BP');
+  }
+
+  const hr = typeof heartRate === 'number' && !isNaN(heartRate) ? heartRate : 72;
+  if (hr > 100 || hr < 50) {
+    stabilityIndex -= 20;
+    flags.push(hr > 100 ? 'Tachycardia' : 'Bradycardia');
+  }
+
+  const spo2 = typeof oxygenSatPercentage === 'number' && !isNaN(oxygenSatPercentage) ? oxygenSatPercentage : 98;
+  if (spo2 < 95) {
+    stabilityIndex -= 25;
+    flags.push('Low Oxygen Saturation (<95%)');
+  }
+
+  const temp = typeof temperatureC === 'number' && !isNaN(temperatureC) ? temperatureC : 37.0;
+  if (temp > 37.8 || temp < 36.0) {
+    stabilityIndex -= 15;
+    flags.push(temp > 37.8 ? 'Fever / Pyrexia' : 'Hypothermia risk');
+  }
+
+  stabilityIndex = Math.max(0, stabilityIndex);
+
+  let clinicalTier = 'OPTIMAL';
+  if (stabilityIndex < 60) clinicalTier = 'CRITICAL';
+  else if (stabilityIndex < 85) clinicalTier = 'WATCH';
+
+  return {
+    valid: true,
+    systolicBp,
+    diastolicBp,
+    heartRate: hr,
+    oxygenSatPercentage: spo2,
+    temperatureC: temp,
+    stabilityIndex,
+    clinicalTier,
+    isStable: stabilityIndex >= 70,
+    flags,
+    recommendation: stabilityIndex >= 85
+      ? 'Vital signs within target therapeutic range.'
+      : 'Vitals require close clinical observation and potential physician consult.'
+  };
+}
+
+
 
 
 
