@@ -397,3 +397,52 @@ export function calculateMedicationAdherenceRiskScore({ missedDoses30Days = 0, r
     isHighRisk: riskLevel === 'HIGH'
   };
 }
+
+export function calculateDoctorSlotOccupancyAndAvailability(schedules = [], appointments = [], targetDoctorId = null) {
+  if (!Array.isArray(schedules) || schedules.length === 0) {
+    return {
+      totalCapacitySlots: 0,
+      bookedAppointmentsCount: 0,
+      availableSlotsCount: 0,
+      occupancyPercentage: 0,
+      status: 'AVAILABLE'
+    };
+  }
+
+  const filteredSchedules = targetDoctorId
+    ? schedules.filter(s => s && s.doctor_id === targetDoctorId)
+    : schedules;
+
+  const filteredAppointments = targetDoctorId
+    ? (Array.isArray(appointments) ? appointments.filter(a => a && a.doctor_id === targetDoctorId && a.status !== 'cancelled') : [])
+    : (Array.isArray(appointments) ? appointments.filter(a => a && a.status !== 'cancelled') : []);
+
+  let totalCapacitySlots = 0;
+  for (const s of filteredSchedules) {
+    if (s && typeof s.available_slots === 'number' && !isNaN(s.available_slots) && s.available_slots > 0) {
+      totalCapacitySlots += s.available_slots;
+    }
+  }
+
+  const bookedAppointmentsCount = filteredAppointments.length;
+  const availableSlotsCount = Math.max(0, totalCapacitySlots - bookedAppointmentsCount);
+  const occupancyPercentage = totalCapacitySlots > 0
+    ? Math.round((bookedAppointmentsCount / totalCapacitySlots) * 100 * 100) / 100
+    : 0;
+
+  let status = 'AVAILABLE';
+  if (occupancyPercentage >= 100 || availableSlotsCount === 0) {
+    status = 'FULL';
+  } else if (occupancyPercentage >= 75) {
+    status = 'HIGH_DEMAND';
+  }
+
+  return {
+    totalCapacitySlots,
+    bookedAppointmentsCount,
+    availableSlotsCount,
+    occupancyPercentage,
+    status
+  };
+}
+

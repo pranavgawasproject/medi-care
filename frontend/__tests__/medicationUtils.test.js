@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 import test from 'node:test';
-import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore } from '../src/utils/medicationUtils.js';
+import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability } from '../src/utils/medicationUtils.js';
 
 
 
@@ -179,6 +179,31 @@ test('calculateMedicationAdherenceRiskScore', () => {
   assert.strictEqual(lowRisk.isHighRisk, false);
   assert.strictEqual(lowRisk.riskScore, 0);
 });
+
+test('calculateDoctorSlotOccupancyAndAvailability', () => {
+  const schedules = [
+    { doctor_id: 'doc1', available_slots: 10 },
+    { doctor_id: 'doc2', available_slots: 10 }
+  ];
+  const appointments = [
+    { doctor_id: 'doc1', status: 'confirmed' },
+    { doctor_id: 'doc1', status: 'pending' }
+  ];
+
+  const overall = calculateDoctorSlotOccupancyAndAvailability(schedules, appointments);
+  assert.strictEqual(overall.totalCapacitySlots, 20);
+  assert.strictEqual(overall.bookedAppointmentsCount, 2);
+  assert.strictEqual(overall.availableSlotsCount, 18);
+  assert.strictEqual(overall.occupancyPercentage, 10);
+  assert.strictEqual(overall.status, 'AVAILABLE');
+
+  const doc1 = calculateDoctorSlotOccupancyAndAvailability(schedules, appointments, 'doc1');
+  assert.strictEqual(doc1.totalCapacitySlots, 10);
+  assert.strictEqual(doc1.bookedAppointmentsCount, 2);
+  assert.strictEqual(doc1.availableSlotsCount, 8);
+  assert.strictEqual(doc1.occupancyPercentage, 20);
+});
+
 
 
 
