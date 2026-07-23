@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 import test from 'node:test';
-import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore } from '../src/utils/medicationUtils.js';
+import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore, calculateMedicationInteractionRiskScore } from '../src/utils/medicationUtils.js';
 
 
 
@@ -255,6 +255,18 @@ test('calculateTelehealthSlotOptimizationScore', () => {
   assert.strictEqual(res.maxSlots, 32);
   assert.strictEqual(res.remainingSlots, 22);
   assert.strictEqual(res.isHighPrioritySlot, true);
+});
+
+test('calculateMedicationInteractionRiskScore', () => {
+  const res = calculateMedicationInteractionRiskScore({
+    activeMedications: ['Aspirin', 'Lisinopril', 'Metformin', 'Atorvastatin', 'Omeprazole'],
+    knownAllergies: ['Aspirin'],
+    hasRenalImpairment: true
+  });
+  assert.strictEqual(res.valid, true);
+  assert.strictEqual(res.riskTier, 'CRITICAL');
+  assert.strictEqual(res.hasAllergyConflict, true);
+  assert.ok(res.interactionRiskScore >= 60);
 });
 
 

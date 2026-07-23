@@ -577,6 +577,57 @@ export function calculateTelehealthSlotOptimizationScore({
   };
 }
 
+export function calculateMedicationInteractionRiskScore({
+  activeMedications = [],
+  knownAllergies = [],
+  hasRenalImpairment = false
+} = {}) {
+  const meds = Array.isArray(activeMedications) ? activeMedications.map(m => (typeof m === 'string' ? m : m.name || '').trim().toLowerCase()).filter(Boolean) : [];
+  const allergies = Array.isArray(knownAllergies) ? knownAllergies.map(a => (typeof a === 'string' ? a : a.name || '').trim().toLowerCase()).filter(Boolean) : [];
+
+  let score = 0;
+  const warnings = [];
+
+  if (meds.length >= 5) {
+    score += 30;
+    warnings.push('Polypharmacy risk: 5+ concurrent medications');
+  } else if (meds.length >= 3) {
+    score += 15;
+  }
+
+  if (hasRenalImpairment) {
+    score += 25;
+    warnings.push('Renal clearance adjustment required');
+  }
+
+  // Check for allergy matches
+  for (const m of meds) {
+    if (allergies.some(a => m.includes(a) || a.includes(m))) {
+      score += 40;
+      warnings.push(`Potential allergy flag for medication: ${m}`);
+    }
+  }
+
+  score = Math.min(100, score);
+
+  let riskTier = 'LOW';
+  if (score >= 60) riskTier = 'CRITICAL';
+  else if (score >= 35) riskTier = 'MODERATE';
+
+  return {
+    valid: true,
+    medicationCount: meds.length,
+    interactionRiskScore: score,
+    riskTier,
+    hasAllergyConflict: score >= 40,
+    warnings,
+    clinicalRecommendation: score >= 60
+      ? 'High risk profile: Request immediate clinical pharmacy review.'
+      : 'Low to moderate interaction risk: Standard dosing schedule.'
+  };
+}
+
+
 
 
 
