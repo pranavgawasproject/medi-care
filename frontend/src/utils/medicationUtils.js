@@ -503,4 +503,39 @@ export function calculateEmergencyTriagePriorityLevel({ heartRate = 72, systolic
   };
 }
 
+export function calculateMedicationAdherenceRate({ dosesScheduled = 30, dosesTaken = 30 } = {}) {
+  const scheduled = typeof dosesScheduled === 'number' && !isNaN(dosesScheduled) && dosesScheduled > 0 ? dosesScheduled : 30;
+  const taken = typeof dosesTaken === 'number' && !isNaN(dosesTaken) && dosesTaken >= 0 ? dosesTaken : 0;
+
+  const validTaken = Math.min(scheduled, taken);
+  const adherencePercentage = Math.min(100, Math.round((validTaken / scheduled) * 100 * 100) / 100);
+  const missedDosesCount = Math.max(0, scheduled - validTaken);
+
+  let riskTier = 'OPTIMAL';
+  let isAlertTriggered = false;
+  let clinicalAdvice = 'Excellent adherence. Keep maintaining your daily dosage schedule.';
+
+  if (adherencePercentage < 70) {
+    riskTier = 'NON_ADHERENT';
+    isAlertTriggered = true;
+    clinicalAdvice = 'High risk of therapeutic failure. Urgent clinical follow-up or automated pill reminder recommended.';
+  } else if (adherencePercentage < 85) {
+    riskTier = 'SUB_OPTIMAL';
+    isAlertTriggered = true;
+    clinicalAdvice = 'Sub-optimal adherence. Consider setting daily alarm reminders to avoid missed doses.';
+  }
+
+  return {
+    valid: true,
+    dosesScheduled: scheduled,
+    dosesTaken: validTaken,
+    missedDosesCount,
+    adherencePercentage,
+    riskTier,
+    isAlertTriggered,
+    clinicalAdvice
+  };
+}
+
+
 

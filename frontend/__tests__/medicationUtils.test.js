@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 import test from 'node:test';
-import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel } from '../src/utils/medicationUtils.js';
+import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate } from '../src/utils/medicationUtils.js';
 
 
 
@@ -224,6 +224,24 @@ test('calculateEmergencyTriagePriorityLevel', () => {
   assert.strictEqual(nonUrgent.triageLevel, 5);
   assert.strictEqual(nonUrgent.maxWaitMinutes, 120);
 });
+
+test('calculateMedicationAdherenceRate', () => {
+  const optimal = calculateMedicationAdherenceRate({ dosesScheduled: 30, dosesTaken: 29 });
+  assert.strictEqual(optimal.adherencePercentage, 96.67);
+  assert.strictEqual(optimal.riskTier, 'OPTIMAL');
+  assert.strictEqual(optimal.isAlertTriggered, false);
+
+  const subOptimal = calculateMedicationAdherenceRate({ dosesScheduled: 30, dosesTaken: 24 });
+  assert.strictEqual(subOptimal.adherencePercentage, 80);
+  assert.strictEqual(subOptimal.riskTier, 'SUB_OPTIMAL');
+  assert.strictEqual(subOptimal.isAlertTriggered, true);
+
+  const nonAdherent = calculateMedicationAdherenceRate({ dosesScheduled: 30, dosesTaken: 15 });
+  assert.strictEqual(nonAdherent.adherencePercentage, 50);
+  assert.strictEqual(nonAdherent.riskTier, 'NON_ADHERENT');
+  assert.strictEqual(nonAdherent.isAlertTriggered, true);
+});
+
 
 
 
