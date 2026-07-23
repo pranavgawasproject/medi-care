@@ -1,6 +1,8 @@
 import assert from 'node:assert';
 import test from 'node:test';
-import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate } from '../src/utils/medicationUtils.js';
+import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore } from '../src/utils/medicationUtils.js';
+
+
 
 
 
@@ -241,6 +243,20 @@ test('calculateMedicationAdherenceRate', () => {
   assert.strictEqual(nonAdherent.riskTier, 'NON_ADHERENT');
   assert.strictEqual(nonAdherent.isAlertTriggered, true);
 });
+
+test('calculateTelehealthSlotOptimizationScore', () => {
+  const res = calculateTelehealthSlotOptimizationScore({
+    doctorAvailableHours: 8,
+    bookedSlots: 10,
+    patientUrgencyLevel: 'HIGH',
+    isFollowUpAppointment: true
+  });
+  assert.strictEqual(res.valid, true);
+  assert.strictEqual(res.maxSlots, 32);
+  assert.strictEqual(res.remainingSlots, 22);
+  assert.strictEqual(res.isHighPrioritySlot, true);
+});
+
 
 
 

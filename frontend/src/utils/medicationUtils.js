@@ -537,5 +537,46 @@ export function calculateMedicationAdherenceRate({ dosesScheduled = 30, dosesTak
   };
 }
 
+export function calculateTelehealthSlotOptimizationScore({
+  doctorAvailableHours = 6,
+  bookedSlots = 4,
+  patientUrgencyLevel = 'MEDIUM',
+  isFollowUpAppointment = false
+} = {}) {
+  if (typeof doctorAvailableHours !== 'number' || doctorAvailableHours <= 0 || isNaN(doctorAvailableHours)) {
+    return { valid: false, error: 'Doctor available hours must be a positive number' };
+  }
+  if (typeof bookedSlots !== 'number' || bookedSlots < 0 || isNaN(bookedSlots)) {
+    return { valid: false, error: 'Booked slots must be a non-negative number' };
+  }
+
+  const maxSlots = Math.floor(doctorAvailableHours * 4);
+  const remainingSlots = Math.max(0, maxSlots - bookedSlots);
+  const occupancyPercentage = Math.min(100, Math.round((bookedSlots / maxSlots) * 100));
+
+  let priorityWeight = 1.0;
+  if (patientUrgencyLevel === 'HIGH' || patientUrgencyLevel === 'CRITICAL') priorityWeight = 2.5;
+  else if (patientUrgencyLevel === 'MEDIUM') priorityWeight = 1.5;
+
+  if (isFollowUpAppointment) priorityWeight += 0.5;
+
+  const slotScore = Math.min(100, Math.round((remainingSlots / maxSlots) * 50 + (priorityWeight * 20)));
+
+  return {
+    valid: true,
+    maxSlots,
+    bookedSlots,
+    remainingSlots,
+    occupancyPercentage,
+    priorityWeight,
+    slotScore,
+    isHighPrioritySlot: priorityWeight >= 2.0,
+    recommendation: remainingSlots < 2
+      ? 'Limited availability. Reserve slot immediately for priority case.'
+      : 'Sufficient slots available for routine scheduling.'
+  };
+}
+
+
 
 
