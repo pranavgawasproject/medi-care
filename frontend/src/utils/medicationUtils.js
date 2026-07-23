@@ -446,3 +446,61 @@ export function calculateDoctorSlotOccupancyAndAvailability(schedules = [], appo
   };
 }
 
+export function calculateEmergencyTriagePriorityLevel({ heartRate = 72, systolicBp = 120, temperatureC = 37.0, painScale = 0, respsPerMin = 16, isUnresponsive = false } = {}) {
+  const hr = typeof heartRate === 'number' && !isNaN(heartRate) ? heartRate : 72;
+  const sbp = typeof systolicBp === 'number' && !isNaN(systolicBp) ? systolicBp : 120;
+  const temp = typeof temperatureC === 'number' && !isNaN(temperatureC) ? temperatureC : 37.0;
+  const pain = typeof painScale === 'number' && !isNaN(painScale) ? Math.max(0, Math.min(10, painScale)) : 0;
+  const resp = typeof respsPerMin === 'number' && !isNaN(respsPerMin) ? respsPerMin : 16;
+  const unresponsive = Boolean(isUnresponsive);
+
+  if (unresponsive || hr < 40 || hr > 150 || sbp < 70) {
+    return {
+      triageLevel: 1,
+      levelLabel: 'LEVEL 1 - RESUSCITATION',
+      maxWaitMinutes: 0,
+      requiresImmediateResuscitation: true,
+      primaryReason: unresponsive ? 'Patient unresponsive' : 'Severe vital sign instability / hemodynamic collapse'
+    };
+  }
+
+  if (sbp >= 180 || pain >= 8 || temp >= 39.5 || resp > 28) {
+    return {
+      triageLevel: 2,
+      levelLabel: 'LEVEL 2 - EMERGENT',
+      maxWaitMinutes: 15,
+      requiresImmediateResuscitation: false,
+      primaryReason: 'High risk condition, severe pain, or severe physiological distress'
+    };
+  }
+
+  if (temp >= 38.3 || pain >= 5 || resp >= 22 || hr > 100) {
+    return {
+      triageLevel: 3,
+      levelLabel: 'LEVEL 3 - URGENT',
+      maxWaitMinutes: 30,
+      requiresImmediateResuscitation: false,
+      primaryReason: 'Moderate systemic symptoms or moderate pain requiring timely evaluation'
+    };
+  }
+
+  if (pain >= 3 || temp > 37.5) {
+    return {
+      triageLevel: 4,
+      levelLabel: 'LEVEL 4 - LESS URGENT',
+      maxWaitMinutes: 60,
+      requiresImmediateResuscitation: false,
+      primaryReason: 'Mild localized symptoms or minor discomfort'
+    };
+  }
+
+  return {
+    triageLevel: 5,
+    levelLabel: 'LEVEL 5 - NON-URGENT',
+    maxWaitMinutes: 120,
+    requiresImmediateResuscitation: false,
+    primaryReason: 'Routine health checkup or non-acute presentation'
+  };
+}
+
+

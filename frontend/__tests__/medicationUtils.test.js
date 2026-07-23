@@ -1,6 +1,7 @@
 import assert from 'node:assert';
 import test from 'node:test';
-import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability } from '../src/utils/medicationUtils.js';
+import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel } from '../src/utils/medicationUtils.js';
+
 
 
 
@@ -203,6 +204,27 @@ test('calculateDoctorSlotOccupancyAndAvailability', () => {
   assert.strictEqual(doc1.availableSlotsCount, 8);
   assert.strictEqual(doc1.occupancyPercentage, 20);
 });
+
+test('calculateEmergencyTriagePriorityLevel', () => {
+  const resuscitation = calculateEmergencyTriagePriorityLevel({ isUnresponsive: true });
+  assert.strictEqual(resuscitation.triageLevel, 1);
+  assert.strictEqual(resuscitation.maxWaitMinutes, 0);
+  assert.strictEqual(resuscitation.requiresImmediateResuscitation, true);
+
+  const emergent = calculateEmergencyTriagePriorityLevel({ systolicBp: 185, painScale: 9 });
+  assert.strictEqual(emergent.triageLevel, 2);
+  assert.strictEqual(emergent.maxWaitMinutes, 15);
+  assert.strictEqual(emergent.requiresImmediateResuscitation, false);
+
+  const urgent = calculateEmergencyTriagePriorityLevel({ temperatureC: 38.5, painScale: 6 });
+  assert.strictEqual(urgent.triageLevel, 3);
+  assert.strictEqual(urgent.maxWaitMinutes, 30);
+
+  const nonUrgent = calculateEmergencyTriagePriorityLevel({ heartRate: 72, systolicBp: 118, temperatureC: 36.8, painScale: 0 });
+  assert.strictEqual(nonUrgent.triageLevel, 5);
+  assert.strictEqual(nonUrgent.maxWaitMinutes, 120);
+});
+
 
 
 
