@@ -1,6 +1,7 @@
 import assert from 'node:assert';
 import test from 'node:test';
-import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore, calculateMedicationInteractionRiskScore, calculatePatientVitalSignStabilityIndex, calculatePatientAppointmentTriagePriority } from '../src/utils/medicationUtils.js';
+import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore, calculateMedicationInteractionRiskScore, calculatePatientVitalSignStabilityIndex, calculatePatientAppointmentTriagePriority, calculatePatientPrescriptionRefillRiskIndex } from '../src/utils/medicationUtils.js';
+
 
 
 
@@ -318,6 +319,28 @@ test('calculatePatientAppointmentTriagePriority', () => {
   const resInvalid = calculatePatientAppointmentTriagePriority({ symptomSeverityScore: 12 });
   assert.strictEqual(resInvalid.valid, false);
 });
+
+test('calculatePatientPrescriptionRefillRiskIndex', () => {
+  const stockout = calculatePatientPrescriptionRefillRiskIndex({
+    daysSupplyRemaining: 2,
+    pharmacyProcessingDays: 3,
+    hasRefillsRemaining: false
+  });
+  assert.strictEqual(stockout.valid, true);
+  assert.strictEqual(stockout.isStockoutRisk, true);
+  assert.strictEqual(stockout.riskLevel, 'CRITICAL');
+  assert.ok(stockout.riskScore >= 75);
+
+  const adequate = calculatePatientPrescriptionRefillRiskIndex({
+    daysSupplyRemaining: 15,
+    pharmacyProcessingDays: 3,
+    hasRefillsRemaining: true
+  });
+  assert.strictEqual(adequate.valid, true);
+  assert.strictEqual(adequate.isStockoutRisk, false);
+  assert.strictEqual(adequate.riskLevel, 'LOW');
+});
+
 
 
 

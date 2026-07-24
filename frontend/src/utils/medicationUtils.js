@@ -736,3 +736,46 @@ export function calculatePatientAppointmentTriagePriority({
       : 'Standard intake queue processing.'
   };
 }
+
+export function calculatePatientPrescriptionRefillRiskIndex({
+  daysSupplyRemaining = 5,
+  pharmacyProcessingDays = 3,
+  isControlledSubstance = false,
+  hasRefillsRemaining = true
+} = {}) {
+  if (typeof daysSupplyRemaining !== 'number' || daysSupplyRemaining < 0 || isNaN(daysSupplyRemaining)) {
+    return { valid: false, error: 'Days supply remaining must be a non-negative number' };
+  }
+
+  const processing = typeof pharmacyProcessingDays === 'number' && pharmacyProcessingDays >= 0 ? pharmacyProcessingDays : 3;
+  const leadBufferDays = daysSupplyRemaining - processing;
+
+  let riskScore = 20;
+  if (!hasRefillsRemaining) riskScore += 40;
+  if (leadBufferDays <= 1) riskScore += 30;
+  else if (leadBufferDays <= 3) riskScore += 15;
+  if (isControlledSubstance) riskScore += 15;
+
+  riskScore = Math.min(100, riskScore);
+
+  let riskLevel = 'LOW';
+  if (riskScore >= 75) riskLevel = 'CRITICAL';
+  else if (riskScore >= 50) riskLevel = 'HIGH';
+  else if (riskScore >= 35) riskLevel = 'MODERATE';
+
+  return {
+    valid: true,
+    daysSupplyRemaining,
+    pharmacyProcessingDays: processing,
+    leadBufferDays,
+    isControlledSubstance,
+    hasRefillsRemaining,
+    riskScore,
+    riskLevel,
+    isStockoutRisk: leadBufferDays <= 1 || !hasRefillsRemaining,
+    recommendation: leadBufferDays <= 1 || !hasRefillsRemaining
+      ? 'Immediate refill processing required to prevent medication gap.'
+      : 'Adequate supply buffer remaining for standard refill processing.'
+  };
+}
+
