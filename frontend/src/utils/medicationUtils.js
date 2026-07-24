@@ -987,6 +987,60 @@ export function calculatePatientEmergencyRiskScore({
   };
 }
 
+export function calculatePatientAppointmentNoShowProbability({
+  pastNoShowCount = 1,
+  totalAppointmentsBooked = 5,
+  distanceToClinicKm = 10,
+  appointmentLeadDays = 7,
+  reminderSent = true
+} = {}) {
+  if (typeof totalAppointmentsBooked !== 'number' || totalAppointmentsBooked <= 0 || isNaN(totalAppointmentsBooked)) {
+    return { valid: false, error: 'Total appointments booked must be a positive number' };
+  }
+
+  const noShows = typeof pastNoShowCount === 'number' && pastNoShowCount >= 0 ? pastNoShowCount : 0;
+  const leadDays = typeof appointmentLeadDays === 'number' && appointmentLeadDays >= 0 ? appointmentLeadDays : 0;
+  const distance = typeof distanceToClinicKm === 'number' && distanceToClinicKm >= 0 ? distanceToClinicKm : 0;
+
+  const historicalNoShowRate = Math.min(1.0, noShows / Math.max(1, totalAppointmentsBooked));
+  let baseScore = historicalNoShowRate * 50;
+
+  if (leadDays > 14) baseScore += 20;
+  else if (leadDays > 7) baseScore += 10;
+
+  if (distance > 25) baseScore += 15;
+  else if (distance > 10) baseScore += 8;
+
+  if (!reminderSent) baseScore += 15;
+
+  const noShowProbabilityScore = Math.min(100, Math.round(baseScore));
+
+  let riskTier = 'LOW_RISK';
+  if (noShowProbabilityScore >= 60) riskTier = 'HIGH_RISK';
+  else if (noShowProbabilityScore >= 35) riskTier = 'MODERATE_RISK';
+
+  let recommendation = 'Low risk of appointment no-show. Standard reminder schedule.';
+  if (riskTier === 'HIGH_RISK') {
+    recommendation = 'High no-show risk: Send automated SMS/phone confirmation and consider overbooking/standby slot.';
+  } else if (riskTier === 'MODERATE_RISK') {
+    recommendation = 'Moderate no-show risk: Send 24-hour reminder prompt.';
+  }
+
+  return {
+    valid: true,
+    pastNoShowCount: noShows,
+    totalAppointmentsBooked,
+    distanceToClinicKm: distance,
+    appointmentLeadDays: leadDays,
+    reminderSent: Boolean(reminderSent),
+    noShowProbabilityScore,
+    riskTier,
+    requiresConfirmationCall: riskTier === 'HIGH_RISK',
+    recommendation
+  };
+}
+
+
 
 
 

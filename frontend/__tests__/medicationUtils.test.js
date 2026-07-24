@@ -1,6 +1,7 @@
 import assert from 'node:assert';
 import test from 'node:test';
-import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore, calculateMedicationInteractionRiskScore, calculatePatientVitalSignStabilityIndex, calculatePatientAppointmentTriagePriority, calculatePatientPrescriptionRefillRiskIndex, calculatePatientPolypharmacyRiskIndex, calculatePatientReadmissionRiskScore, calculatePatientMedicationAdherenceTier, calculatePatientEmergencyRiskScore } from '../src/utils/medicationUtils.js';
+import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore, calculateMedicationInteractionRiskScore, calculatePatientVitalSignStabilityIndex, calculatePatientAppointmentTriagePriority, calculatePatientPrescriptionRefillRiskIndex, calculatePatientPolypharmacyRiskIndex, calculatePatientReadmissionRiskScore, calculatePatientMedicationAdherenceTier, calculatePatientEmergencyRiskScore, calculatePatientAppointmentNoShowProbability } from '../src/utils/medicationUtils.js';
+
 
 
 
@@ -449,6 +450,34 @@ test('calculatePatientEmergencyRiskScore', () => {
   const invalid = calculatePatientEmergencyRiskScore({ heartRateBpm: -10 });
   assert.strictEqual(invalid.valid, false);
 });
+
+test('calculatePatientAppointmentNoShowProbability - evaluates low and high risk tiers correctly', () => {
+  const lowRisk = calculatePatientAppointmentNoShowProbability({
+    pastNoShowCount: 0,
+    totalAppointmentsBooked: 10,
+    distanceToClinicKm: 3,
+    appointmentLeadDays: 2,
+    reminderSent: true
+  });
+  assert.strictEqual(lowRisk.valid, true);
+  assert.strictEqual(lowRisk.riskTier, 'LOW_RISK');
+  assert.strictEqual(lowRisk.requiresConfirmationCall, false);
+
+  const highRisk = calculatePatientAppointmentNoShowProbability({
+    pastNoShowCount: 4,
+    totalAppointmentsBooked: 5,
+    distanceToClinicKm: 30,
+    appointmentLeadDays: 20,
+    reminderSent: false
+  });
+  assert.strictEqual(highRisk.valid, true);
+  assert.strictEqual(highRisk.riskTier, 'HIGH_RISK');
+  assert.strictEqual(highRisk.requiresConfirmationCall, true);
+
+  const invalid = calculatePatientAppointmentNoShowProbability({ totalAppointmentsBooked: -1 });
+  assert.strictEqual(invalid.valid, false);
+});
+
 
 
 
