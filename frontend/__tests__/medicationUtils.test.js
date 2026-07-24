@@ -1,6 +1,7 @@
 import assert from 'node:assert';
 import test from 'node:test';
-import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore, calculateMedicationInteractionRiskScore, calculatePatientVitalSignStabilityIndex, calculatePatientAppointmentTriagePriority, calculatePatientPrescriptionRefillRiskIndex } from '../src/utils/medicationUtils.js';
+import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore, calculateMedicationInteractionRiskScore, calculatePatientVitalSignStabilityIndex, calculatePatientAppointmentTriagePriority, calculatePatientPrescriptionRefillRiskIndex, calculatePatientPolypharmacyRiskIndex } from '../src/utils/medicationUtils.js';
+
 
 
 
@@ -340,6 +341,30 @@ test('calculatePatientPrescriptionRefillRiskIndex', () => {
   assert.strictEqual(adequate.isStockoutRisk, false);
   assert.strictEqual(adequate.riskLevel, 'LOW');
 });
+
+test('calculatePatientPolypharmacyRiskIndex', () => {
+  const highRisk = calculatePatientPolypharmacyRiskIndex({
+    activeMedicationCount: 6,
+    patientAgeYears: 70,
+    hasRenalImpairment: true
+  });
+  assert.strictEqual(highRisk.valid, true);
+  assert.strictEqual(highRisk.riskLevel, 'CRITICAL');
+  assert.strictEqual(highRisk.isHighRisk, true);
+  assert.ok(highRisk.recommendation.includes('clinical pharmacist review'));
+
+  const lowRisk = calculatePatientPolypharmacyRiskIndex({
+    activeMedicationCount: 1,
+    patientAgeYears: 30
+  });
+  assert.strictEqual(lowRisk.valid, true);
+  assert.strictEqual(lowRisk.riskLevel, 'LOW');
+  assert.strictEqual(lowRisk.isHighRisk, false);
+
+  const invalid = calculatePatientPolypharmacyRiskIndex({ activeMedicationCount: -2 });
+  assert.strictEqual(invalid.valid, false);
+});
+
 
 
 

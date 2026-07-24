@@ -779,3 +779,49 @@ export function calculatePatientPrescriptionRefillRiskIndex({
   };
 }
 
+export function calculatePatientPolypharmacyRiskIndex({
+  activeMedicationCount = 1,
+  patientAgeYears = 45,
+  hasHepaticImpairment = false,
+  hasRenalImpairment = false
+} = {}) {
+  if (typeof activeMedicationCount !== 'number' || activeMedicationCount < 0 || isNaN(activeMedicationCount)) {
+    return { valid: false, error: 'Active medication count must be a non-negative number' };
+  }
+  if (typeof patientAgeYears !== 'number' || patientAgeYears < 0 || isNaN(patientAgeYears)) {
+    return { valid: false, error: 'Patient age must be a non-negative number' };
+  }
+
+  let riskScore = Math.min(50, activeMedicationCount * 8);
+  if (patientAgeYears >= 65) riskScore += 15;
+  if (hasHepaticImpairment) riskScore += 15;
+  if (hasRenalImpairment) riskScore += 20;
+
+  riskScore = Math.min(100, Math.round(riskScore));
+
+  let riskLevel = 'LOW';
+  if (riskScore >= 75) riskLevel = 'CRITICAL';
+  else if (riskScore >= 50) riskLevel = 'HIGH';
+  else if (riskScore >= 30) riskLevel = 'MODERATE';
+
+  let recommendation = 'Low polypharmacy risk. Standard medication review frequency.';
+  if (riskLevel === 'CRITICAL' || riskLevel === 'HIGH') {
+    recommendation = 'High polypharmacy risk: Recommend clinical pharmacist review for potential drug-drug interactions and deprescribing options.';
+  } else if (riskLevel === 'MODERATE') {
+    recommendation = 'Moderate polypharmacy risk: Monitor for side effects and ensure dose adjustments for organ function.';
+  }
+
+  return {
+    valid: true,
+    activeMedicationCount,
+    patientAgeYears,
+    hasHepaticImpairment,
+    hasRenalImpairment,
+    riskScore,
+    riskLevel,
+    isHighRisk: riskLevel === 'HIGH' || riskLevel === 'CRITICAL',
+    recommendation
+  };
+}
+
+
