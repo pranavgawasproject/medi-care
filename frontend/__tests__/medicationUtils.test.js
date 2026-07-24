@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 import test from 'node:test';
-import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore, calculateMedicationInteractionRiskScore, calculatePatientVitalSignStabilityIndex, calculatePatientAppointmentTriagePriority, calculatePatientPrescriptionRefillRiskIndex, calculatePatientPolypharmacyRiskIndex } from '../src/utils/medicationUtils.js';
+import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore, calculateMedicationInteractionRiskScore, calculatePatientVitalSignStabilityIndex, calculatePatientAppointmentTriagePriority, calculatePatientPrescriptionRefillRiskIndex, calculatePatientPolypharmacyRiskIndex, calculatePatientReadmissionRiskScore } from '../src/utils/medicationUtils.js';
 
 
 
@@ -362,6 +362,34 @@ test('calculatePatientPolypharmacyRiskIndex', () => {
   assert.strictEqual(lowRisk.isHighRisk, false);
 
   const invalid = calculatePatientPolypharmacyRiskIndex({ activeMedicationCount: -2 });
+  assert.strictEqual(invalid.valid, false);
+});
+
+test('calculatePatientReadmissionRiskScore', () => {
+  const highRisk = calculatePatientReadmissionRiskScore({
+    patientAgeYears: 78,
+    priorHospitalizationsCount: 3,
+    activeMedicationCount: 6,
+    vitalStabilityIndex: 65,
+    hasChronicConditions: true
+  });
+  assert.strictEqual(highRisk.valid, true);
+  assert.strictEqual(highRisk.riskLevel, 'HIGH');
+  assert.strictEqual(highRisk.isHighReadmissionRisk, true);
+  assert.ok(highRisk.recommendation.includes('48 hours'));
+
+  const lowRisk = calculatePatientReadmissionRiskScore({
+    patientAgeYears: 40,
+    priorHospitalizationsCount: 0,
+    activeMedicationCount: 1,
+    vitalStabilityIndex: 95,
+    hasChronicConditions: false
+  });
+  assert.strictEqual(lowRisk.valid, true);
+  assert.strictEqual(lowRisk.riskLevel, 'LOW');
+  assert.strictEqual(lowRisk.isHighReadmissionRisk, false);
+
+  const invalid = calculatePatientReadmissionRiskScore({ patientAgeYears: -5 });
   assert.strictEqual(invalid.valid, false);
 });
 

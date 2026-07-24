@@ -824,4 +824,53 @@ export function calculatePatientPolypharmacyRiskIndex({
   };
 }
 
+export function calculatePatientReadmissionRiskScore({
+  patientAgeYears = 65,
+  priorHospitalizationsCount = 0,
+  activeMedicationCount = 4,
+  vitalStabilityIndex = 80,
+  hasChronicConditions = false
+} = {}) {
+  if (typeof patientAgeYears !== 'number' || patientAgeYears < 0 || isNaN(patientAgeYears)) {
+    return { valid: false, error: 'Patient age must be a non-negative number' };
+  }
+
+  let riskScore = 15;
+  if (patientAgeYears >= 75) riskScore += 20;
+  else if (patientAgeYears >= 65) riskScore += 10;
+
+  const prior = typeof priorHospitalizationsCount === 'number' && priorHospitalizationsCount > 0 ? priorHospitalizationsCount : 0;
+  riskScore += Math.min(30, prior * 10);
+
+  const meds = typeof activeMedicationCount === 'number' && activeMedicationCount > 0 ? activeMedicationCount : 0;
+  if (meds >= 5) riskScore += 15;
+
+  const vitals = typeof vitalStabilityIndex === 'number' ? vitalStabilityIndex : 80;
+  if (vitals < 70) riskScore += 20;
+
+  if (hasChronicConditions) riskScore += 15;
+
+  riskScore = Math.min(100, Math.round(riskScore));
+
+  let riskLevel = 'LOW';
+  if (riskScore >= 70) riskLevel = 'HIGH';
+  else if (riskScore >= 45) riskLevel = 'MODERATE';
+
+  return {
+    valid: true,
+    patientAgeYears,
+    priorHospitalizationsCount: prior,
+    activeMedicationCount: meds,
+    vitalStabilityIndex: vitals,
+    hasChronicConditions: Boolean(hasChronicConditions),
+    riskScore,
+    riskLevel,
+    isHighReadmissionRisk: riskLevel === 'HIGH',
+    recommendation: riskLevel === 'HIGH'
+      ? 'High 30-day readmission risk: Assign dedicated care manager and schedule post-discharge follow-up within 48 hours.'
+      : 'Standard post-discharge monitoring and routine care plan.'
+  };
+}
+
+
 
