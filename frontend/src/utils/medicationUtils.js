@@ -872,5 +872,51 @@ export function calculatePatientReadmissionRiskScore({
   };
 }
 
+export function calculatePatientMedicationAdherenceTier({
+  totalPrescribedDoses = 30,
+  totalDosesTaken = 28,
+  lateDosesCount = 2,
+  sideEffectEventsCount = 0
+} = {}) {
+  if (typeof totalPrescribedDoses !== 'number' || totalPrescribedDoses <= 0 || isNaN(totalPrescribedDoses)) {
+    return { valid: false, error: 'Total prescribed doses must be a positive number' };
+  }
+  if (typeof totalDosesTaken !== 'number' || totalDosesTaken < 0 || isNaN(totalDosesTaken)) {
+    return { valid: false, error: 'Total doses taken must be a non-negative number' };
+  }
+
+  const prescribed = Math.floor(totalPrescribedDoses);
+  const taken = Math.min(prescribed, Math.floor(totalDosesTaken));
+  const late = Math.max(0, typeof lateDosesCount === 'number' ? Math.floor(lateDosesCount) : 0);
+  const sideEffects = Math.max(0, typeof sideEffectEventsCount === 'number' ? Math.floor(sideEffectEventsCount) : 0);
+
+  const rawComplianceRatio = (taken / prescribed);
+  let score = rawComplianceRatio * 80;
+  if (late === 0) score += 10;
+  else score = Math.max(0, score - (late * 2));
+
+  if (sideEffects > 0) score = Math.max(0, score - (sideEffects * 5));
+
+  const adherenceScore = Math.round(Math.min(100, score));
+
+  let tier = 'POOR';
+  if (adherenceScore >= 85) tier = 'EXCELLENT';
+  else if (adherenceScore >= 70) tier = 'MODERATE';
+
+  return {
+    valid: true,
+    totalPrescribedDoses: prescribed,
+    totalDosesTaken: taken,
+    compliancePercentage: Math.round(rawComplianceRatio * 100),
+    adherenceScore,
+    tier,
+    isCompliant: adherenceScore >= 70,
+    recommendation: adherenceScore >= 85
+      ? 'Optimal patient medication adherence.'
+      : 'Review dosage schedule and address side effect concerns with patient.'
+  };
+}
+
+
 
 
