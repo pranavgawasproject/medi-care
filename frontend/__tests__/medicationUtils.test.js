@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 import test from 'node:test';
-import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore, calculateMedicationInteractionRiskScore, calculatePatientVitalSignStabilityIndex } from '../src/utils/medicationUtils.js';
+import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore, calculateMedicationInteractionRiskScore, calculatePatientVitalSignStabilityIndex, calculatePatientAppointmentTriagePriority } from '../src/utils/medicationUtils.js';
 
 
 
@@ -293,6 +293,32 @@ test('calculatePatientVitalSignStabilityIndex', () => {
   assert.strictEqual(resAbnormal.clinicalTier, 'CRITICAL');
   assert.strictEqual(resAbnormal.isStable, false);
 });
+
+test('calculatePatientAppointmentTriagePriority', () => {
+  const res = calculatePatientAppointmentTriagePriority({
+    symptomSeverityScore: 8,
+    waitTimeMinutes: 50,
+    hasPreExistingCondition: true,
+    ageYears: 70
+  });
+  assert.strictEqual(res.valid, true);
+  assert.strictEqual(res.triageCategory, 'EMERGENCY');
+  assert.strictEqual(res.isUrgent, true);
+
+  const resLow = calculatePatientAppointmentTriagePriority({
+    symptomSeverityScore: 3,
+    waitTimeMinutes: 10,
+    hasPreExistingCondition: false,
+    ageYears: 30
+  });
+  assert.strictEqual(resLow.valid, true);
+  assert.strictEqual(resLow.triageCategory, 'LOW');
+  assert.strictEqual(resLow.isUrgent, false);
+
+  const resInvalid = calculatePatientAppointmentTriagePriority({ symptomSeverityScore: 12 });
+  assert.strictEqual(resInvalid.valid, false);
+});
+
 
 
 

@@ -695,8 +695,44 @@ export function calculatePatientVitalSignStabilityIndex({
   };
 }
 
+export function calculatePatientAppointmentTriagePriority({
+  symptomSeverityScore = 5,
+  waitTimeMinutes = 20,
+  hasPreExistingCondition = false,
+  ageYears = 45
+} = {}) {
+  if (typeof symptomSeverityScore !== 'number' || symptomSeverityScore < 1 || symptomSeverityScore > 10 || isNaN(symptomSeverityScore)) {
+    return { valid: false, error: 'Symptom severity score must be a number between 1 and 10' };
+  }
 
+  const wait = typeof waitTimeMinutes === 'number' && waitTimeMinutes >= 0 ? waitTimeMinutes : 0;
+  const age = typeof ageYears === 'number' && ageYears > 0 ? ageYears : 45;
 
+  let priorityScore = symptomSeverityScore * 10;
+  if (wait > 45) priorityScore += 15;
+  else if (wait > 30) priorityScore += 10;
 
+  if (hasPreExistingCondition) priorityScore += 15;
+  if (age > 65 || age < 5) priorityScore += 10;
 
+  priorityScore = Math.min(100, Math.round(priorityScore));
 
+  let triageCategory = 'LOW';
+  if (priorityScore >= 80) triageCategory = 'EMERGENCY';
+  else if (priorityScore >= 60) triageCategory = 'HIGH';
+  else if (priorityScore >= 40) triageCategory = 'MEDIUM';
+
+  return {
+    valid: true,
+    symptomSeverityScore,
+    waitTimeMinutes: wait,
+    hasPreExistingCondition: Boolean(hasPreExistingCondition),
+    ageYears: age,
+    priorityScore,
+    triageCategory,
+    isUrgent: triageCategory === 'EMERGENCY' || triageCategory === 'HIGH',
+    recommendation: priorityScore >= 80
+      ? 'Immediate clinical evaluation required (Emergency Triage).'
+      : 'Standard intake queue processing.'
+  };
+}
