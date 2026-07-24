@@ -917,6 +917,77 @@ export function calculatePatientMedicationAdherenceTier({
   };
 }
 
+export function calculatePatientEmergencyRiskScore({
+  heartRateBpm = 75,
+  systolicBp = 120,
+  oxygenSaturationPercent = 98,
+  bodyTempCelsius = 37.0,
+  respiratoryRateBpm = 16,
+  hasChestPain = false,
+  hasShortnessOfBreath = false
+} = {}) {
+  if (typeof heartRateBpm !== 'number' || heartRateBpm <= 0 || isNaN(heartRateBpm)) {
+    return { valid: false, error: 'Heart rate must be a positive number' };
+  }
+  if (typeof systolicBp !== 'number' || systolicBp <= 0 || isNaN(systolicBp)) {
+    return { valid: false, error: 'Systolic BP must be a positive number' };
+  }
+  if (typeof oxygenSaturationPercent !== 'number' || oxygenSaturationPercent <= 0 || oxygenSaturationPercent > 100 || isNaN(oxygenSaturationPercent)) {
+    return { valid: false, error: 'Oxygen saturation must be between 1 and 100%' };
+  }
+
+  let riskPoints = 0;
+  if (heartRateBpm > 110 || heartRateBpm < 45) riskPoints += 20;
+  else if (heartRateBpm > 100 || heartRateBpm < 50) riskPoints += 10;
+
+  if (systolicBp > 160 || systolicBp < 85) riskPoints += 25;
+  else if (systolicBp > 140 || systolicBp < 90) riskPoints += 12;
+
+  if (oxygenSaturationPercent < 90) riskPoints += 30;
+  else if (oxygenSaturationPercent < 94) riskPoints += 15;
+
+  if (bodyTempCelsius > 39.0 || bodyTempCelsius < 35.0) riskPoints += 15;
+  else if (bodyTempCelsius > 38.0) riskPoints += 8;
+
+  if (respiratoryRateBpm > 25 || respiratoryRateBpm < 10) riskPoints += 20;
+  else if (respiratoryRateBpm > 20) riskPoints += 10;
+
+  if (hasChestPain) riskPoints += 35;
+  if (hasShortnessOfBreath) riskPoints += 30;
+
+  const totalRiskScore = Math.min(100, Math.round(riskPoints));
+
+  let triageTier = 'STABLE';
+  if (totalRiskScore >= 75) triageTier = 'CRITICAL';
+  else if (totalRiskScore >= 50) triageTier = 'HIGH';
+  else if (totalRiskScore >= 25) triageTier = 'MODERATE';
+
+  let recommendation = 'Patient vitals within normal parameters. Routine monitoring.';
+  if (triageTier === 'CRITICAL') {
+    recommendation = 'CRITICAL ALERT: Immediate emergency department escalation or intensive care triage required.';
+  } else if (triageTier === 'HIGH') {
+    recommendation = 'HIGH RISK: Urgent clinical evaluation required within 1 hour.';
+  } else if (triageTier === 'MODERATE') {
+    recommendation = 'MODERATE RISK: Schedule same-day physician evaluation and monitor vitals closely.';
+  }
+
+  return {
+    valid: true,
+    heartRateBpm,
+    systolicBp,
+    oxygenSaturationPercent,
+    bodyTempCelsius,
+    respiratoryRateBpm,
+    hasChestPain: Boolean(hasChestPain),
+    hasShortnessOfBreath: Boolean(hasShortnessOfBreath),
+    totalRiskScore,
+    triageTier,
+    isEmergencyEscalationRequired: triageTier === 'CRITICAL' || triageTier === 'HIGH',
+    recommendation
+  };
+}
+
+
 
 
 
