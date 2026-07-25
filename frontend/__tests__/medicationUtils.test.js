@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 import test from 'node:test';
-import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore, calculateMedicationInteractionRiskScore, calculatePatientVitalSignStabilityIndex, calculatePatientAppointmentTriagePriority, calculatePatientPrescriptionRefillRiskIndex, calculatePatientPolypharmacyRiskIndex, calculatePatientReadmissionRiskScore, calculatePatientMedicationAdherenceTier, calculatePatientEmergencyRiskScore, calculatePatientAppointmentNoShowProbability } from '../src/utils/medicationUtils.js';
+import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore, calculateMedicationInteractionRiskScore, calculatePatientVitalSignStabilityIndex, calculatePatientAppointmentTriagePriority, calculatePatientPrescriptionRefillRiskIndex, calculatePatientPolypharmacyRiskIndex, calculatePatientReadmissionRiskScore, calculatePatientMedicationAdherenceTier, calculatePatientEmergencyRiskScore, calculatePatientAppointmentNoShowProbability, calculatePatientChronicConditionComplexityIndex } from '../src/utils/medicationUtils.js';
 
 
 
@@ -476,6 +476,24 @@ test('calculatePatientAppointmentNoShowProbability - evaluates low and high risk
 
   const invalid = calculatePatientAppointmentNoShowProbability({ totalAppointmentsBooked: -1 });
   assert.strictEqual(invalid.valid, false);
+});
+
+test('calculatePatientChronicConditionComplexityIndex', () => {
+  const highComplexity = calculatePatientChronicConditionComplexityIndex({
+    chronicConditionCount: 4,
+    activeMedicationCount: 6,
+    hospitalizationPastYearCount: 1,
+    ageYears: 70,
+    hasSpecialistCare: false
+  });
+  assert.strictEqual(highComplexity.valid, true);
+  assert.strictEqual(highComplexity.complexityTier, 'HIGH_COMPLEXITY');
+  assert.strictEqual(highComplexity.requiresMultidisciplinaryCare, true);
+  assert.strictEqual(highComplexity.recommendation.includes('multidisciplinary care coordinator'), true);
+
+  const invalid = calculatePatientChronicConditionComplexityIndex({ chronicConditionCount: -1 });
+  assert.strictEqual(invalid.valid, false);
+  assert.strictEqual(invalid.error, 'Chronic condition count must be a non-negative number');
 });
 
 

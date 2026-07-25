@@ -1040,6 +1040,56 @@ export function calculatePatientAppointmentNoShowProbability({
   };
 }
 
+export function calculatePatientChronicConditionComplexityIndex({
+  chronicConditionCount = 2,
+  activeMedicationCount = 4,
+  hospitalizationPastYearCount = 0,
+  ageYears = 60,
+  hasSpecialistCare = true
+} = {}) {
+  if (typeof chronicConditionCount !== 'number' || chronicConditionCount < 0 || isNaN(chronicConditionCount)) {
+    return { valid: false, error: 'Chronic condition count must be a non-negative number' };
+  }
+  if (typeof activeMedicationCount !== 'number' || activeMedicationCount < 0 || isNaN(activeMedicationCount)) {
+    return { valid: false, error: 'Active medication count must be a non-negative number' };
+  }
+
+  const age = typeof ageYears === 'number' && ageYears >= 0 ? ageYears : 50;
+  const hospitalizations = typeof hospitalizationPastYearCount === 'number' && hospitalizationPastYearCount >= 0 ? hospitalizationPastYearCount : 0;
+
+  let score = chronicConditionCount * 15 + activeMedicationCount * 5 + hospitalizations * 20;
+
+  if (age >= 65) score += 10;
+  if (!hasSpecialistCare && chronicConditionCount >= 3) score += 15;
+
+  const complexityScore = Math.min(100, Math.round(score));
+
+  let complexityTier = 'LOW_COMPLEXITY';
+  if (complexityScore >= 65) complexityTier = 'HIGH_COMPLEXITY';
+  else if (complexityScore >= 35) complexityTier = 'MODERATE_COMPLEXITY';
+
+  let recommendation = 'Standard primary care follow-up schedule.';
+  if (complexityTier === 'HIGH_COMPLEXITY') {
+    recommendation = 'Assign multidisciplinary care coordinator and schedule monthly medication review.';
+  } else if (complexityTier === 'MODERATE_COMPLEXITY') {
+    recommendation = 'Schedule quarterly chronic disease management review.';
+  }
+
+  return {
+    valid: true,
+    chronicConditionCount,
+    activeMedicationCount,
+    hospitalizationPastYearCount: hospitalizations,
+    ageYears: age,
+    hasSpecialistCare: Boolean(hasSpecialistCare),
+    complexityScore,
+    complexityTier,
+    requiresMultidisciplinaryCare: complexityTier === 'HIGH_COMPLEXITY',
+    recommendation
+  };
+}
+
+
 
 
 
