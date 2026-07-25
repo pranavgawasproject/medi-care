@@ -1367,6 +1367,48 @@ export function calculateTelehealthSlotOptimizationIndex({
   };
 }
 
+export function calculateTelehealthConsultationTriagingIndex({
+  symptomSeverityScore = 7,
+  vitalsStabilityScore = 8,
+  medicationAdherenceRate = 90,
+  pastVisitCount30Days = 1
+} = {}) {
+  if (typeof symptomSeverityScore !== 'number' || symptomSeverityScore < 1 || symptomSeverityScore > 10 || isNaN(symptomSeverityScore)) {
+    return { valid: false, error: 'Symptom severity score must be between 1 and 10' };
+  }
+  if (typeof vitalsStabilityScore !== 'number' || vitalsStabilityScore < 1 || vitalsStabilityScore > 10 || isNaN(vitalsStabilityScore)) {
+    return { valid: false, error: 'Vitals stability score must be between 1 and 10' };
+  }
+
+  const triageUrgencyScore = Math.min(100, Math.round((symptomSeverityScore * 6) + ((10 - vitalsStabilityScore) * 3) + ((100 - medicationAdherenceRate) * 0.1)));
+
+  let triageTier = 'ROUTINE';
+  let recommendedSlotDurationMins = 15;
+
+  if (triageUrgencyScore >= 75) {
+    triageTier = 'URGENT_TELEHEALTH';
+    recommendedSlotDurationMins = 30;
+  } else if (triageUrgencyScore >= 50) {
+    triageTier = 'PRIORITY';
+    recommendedSlotDurationMins = 20;
+  }
+
+  return {
+    valid: true,
+    symptomSeverityScore,
+    vitalsStabilityScore,
+    triageUrgencyScore,
+    triageTier,
+    recommendedSlotDurationMins,
+    recommendation: triageTier === 'URGENT_TELEHEALTH'
+      ? `Urgent telehealth consultation required (Urgency Score: ${triageUrgencyScore}/100). Allocate 30-minute priority slot.`
+      : triageTier === 'PRIORITY'
+      ? `Priority telehealth consultation recommended (Urgency Score: ${triageUrgencyScore}/100).`
+      : `Routine consultation scheduled (Urgency Score: ${triageUrgencyScore}/100). Standard 15-minute slot.`
+  };
+}
+
+
 
 
 

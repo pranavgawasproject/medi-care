@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 import test from 'node:test';
-import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore, calculateMedicationInteractionRiskScore, calculatePatientVitalSignStabilityIndex, calculatePatientAppointmentTriagePriority, calculatePatientPrescriptionRefillRiskIndex, calculatePatientPolypharmacyRiskIndex, calculatePatientReadmissionRiskScore, calculatePatientMedicationAdherenceTier, calculatePatientEmergencyRiskScore, calculatePatientAppointmentNoShowProbability, calculatePatientChronicConditionComplexityIndex, calculatePatientMedicationRefillAdherenceScore, calculatePatientMedicationStorageTemperatureSafety, calculatePatientVitalSignAnomalyAlertScore, calculatePatientLabTestResultSeverityScore, calculateTelehealthSlotOptimizationIndex } from '../src/utils/medicationUtils.js';
+import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore, calculateMedicationInteractionRiskScore, calculatePatientVitalSignStabilityIndex, calculatePatientAppointmentTriagePriority, calculatePatientPrescriptionRefillRiskIndex, calculatePatientPolypharmacyRiskIndex, calculatePatientReadmissionRiskScore, calculatePatientMedicationAdherenceTier, calculatePatientEmergencyRiskScore, calculatePatientAppointmentNoShowProbability, calculatePatientChronicConditionComplexityIndex, calculatePatientMedicationRefillAdherenceScore, calculatePatientMedicationStorageTemperatureSafety, calculatePatientVitalSignAnomalyAlertScore, calculatePatientLabTestResultSeverityScore, calculateTelehealthSlotOptimizationIndex, calculateTelehealthConsultationTriagingIndex } from '../src/utils/medicationUtils.js';
 
 
 
@@ -600,30 +600,33 @@ test('calculatePatientLabTestResultSeverityScore', () => {
   assert.ok(severe.abnormalMarkers.length >= 3);
 });
 
-test('calculateTelehealthSlotOptimizationIndex', () => {
-  const optimal = calculateTelehealthSlotOptimizationIndex({
-    totalDoctors: 5,
-    totalPatientAppointments: 30,
-    maxSlotsPerDoctorDay: 10
+test('calculateTelehealthConsultationTriagingIndex', () => {
+  const urgent = calculateTelehealthConsultationTriagingIndex({
+    symptomSeverityScore: 9,
+    vitalsStabilityScore: 4,
+    medicationAdherenceRate: 50,
+    pastVisitCount30Days: 2
   });
-  assert.strictEqual(optimal.valid, true);
-  assert.strictEqual(optimal.utilizationPct, 60);
-  assert.strictEqual(optimal.capacityStatus, 'OPTIMAL');
-  assert.ok(optimal.recommendation.includes('optimal efficiency'));
+  assert.strictEqual(urgent.valid, true);
+  assert.strictEqual(urgent.triageTier, 'URGENT_TELEHEALTH');
+  assert.strictEqual(urgent.recommendedSlotDurationMins, 30);
+  assert.ok(urgent.recommendation.includes('Urgent telehealth consultation required'));
 
-  const overbooked = calculateTelehealthSlotOptimizationIndex({
-    totalDoctors: 5,
-    totalPatientAppointments: 48,
-    maxSlotsPerDoctorDay: 10
+  const routine = calculateTelehealthConsultationTriagingIndex({
+    symptomSeverityScore: 3,
+    vitalsStabilityScore: 9,
+    medicationAdherenceRate: 95,
+    pastVisitCount30Days: 0
   });
-  assert.strictEqual(overbooked.valid, true);
-  assert.strictEqual(overbooked.capacityStatus, 'OVERBOOKED');
-  assert.ok(overbooked.recommendation.includes('overbooked'));
+  assert.strictEqual(routine.valid, true);
+  assert.strictEqual(routine.triageTier, 'ROUTINE');
+  assert.strictEqual(routine.recommendedSlotDurationMins, 15);
 
-  const invalid = calculateTelehealthSlotOptimizationIndex({ totalDoctors: 0 });
+  const invalid = calculateTelehealthConsultationTriagingIndex({ symptomSeverityScore: 15 });
   assert.strictEqual(invalid.valid, false);
-  assert.strictEqual(invalid.error, 'Total doctors count must be a positive number');
+  assert.strictEqual(invalid.error, 'Symptom severity score must be between 1 and 10');
 });
+
 
 
 
