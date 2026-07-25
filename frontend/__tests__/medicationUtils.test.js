@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 import test from 'node:test';
-import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore, calculateMedicationInteractionRiskScore, calculatePatientVitalSignStabilityIndex, calculatePatientAppointmentTriagePriority, calculatePatientPrescriptionRefillRiskIndex, calculatePatientPolypharmacyRiskIndex, calculatePatientReadmissionRiskScore, calculatePatientMedicationAdherenceTier, calculatePatientEmergencyRiskScore, calculatePatientAppointmentNoShowProbability, calculatePatientChronicConditionComplexityIndex, calculatePatientMedicationRefillAdherenceScore, calculatePatientMedicationStorageTemperatureSafety, calculatePatientVitalSignAnomalyAlertScore } from '../src/utils/medicationUtils.js';
+import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore, calculateMedicationInteractionRiskScore, calculatePatientVitalSignStabilityIndex, calculatePatientAppointmentTriagePriority, calculatePatientPrescriptionRefillRiskIndex, calculatePatientPolypharmacyRiskIndex, calculatePatientReadmissionRiskScore, calculatePatientMedicationAdherenceTier, calculatePatientEmergencyRiskScore, calculatePatientAppointmentNoShowProbability, calculatePatientChronicConditionComplexityIndex, calculatePatientMedicationRefillAdherenceScore, calculatePatientMedicationStorageTemperatureSafety, calculatePatientVitalSignAnomalyAlertScore, calculatePatientLabTestResultSeverityScore } from '../src/utils/medicationUtils.js';
 
 
 
@@ -575,6 +575,29 @@ test('calculatePatientVitalSignAnomalyAlertScore - calculates anomaly alert scor
   assert.strictEqual(critical.isUrgentCareNeeded, true);
   assert.ok(critical.warnings.includes('Hypertensive Crisis'));
   assert.ok(critical.warnings.includes('Severe Hypoxia'));
+});
+
+test('calculatePatientLabTestResultSeverityScore', () => {
+  const normal = calculatePatientLabTestResultSeverityScore({
+    hba1cPct: 5.4,
+    fastingGlucoseMgDl: 90,
+    creatinineMgDl: 0.9,
+    altLiverEnzymeUL: 22
+  });
+  assert.strictEqual(normal.valid, true);
+  assert.strictEqual(normal.severityTier, 'NORMAL');
+  assert.strictEqual(normal.isFollowUpRequired, false);
+
+  const severe = calculatePatientLabTestResultSeverityScore({
+    hba1cPct: 9.5,
+    fastingGlucoseMgDl: 210,
+    creatinineMgDl: 2.2,
+    altLiverEnzymeUL: 110
+  });
+  assert.strictEqual(severe.valid, true);
+  assert.strictEqual(severe.severityTier, 'HIGH_SEVERITY');
+  assert.strictEqual(severe.isFollowUpRequired, true);
+  assert.ok(severe.abnormalMarkers.length >= 3);
 });
 
 

@@ -1261,6 +1261,72 @@ export function calculatePatientVitalSignAnomalyAlertScore({
   };
 }
 
+export function calculatePatientLabTestResultSeverityScore({
+  hba1cPct = 5.6,
+  fastingGlucoseMgDl = 95,
+  creatinineMgDl = 0.9,
+  altLiverEnzymeUL = 25
+} = {}) {
+  const hba1c = typeof hba1cPct === 'number' && hba1cPct > 0 ? hba1cPct : 5.6;
+  const glucose = typeof fastingGlucoseMgDl === 'number' && fastingGlucoseMgDl > 0 ? fastingGlucoseMgDl : 95;
+  const creatinine = typeof creatinineMgDl === 'number' && creatinineMgDl > 0 ? creatinineMgDl : 0.9;
+  const alt = typeof altLiverEnzymeUL === 'number' && altLiverEnzymeUL > 0 ? altLiverEnzymeUL : 25;
+
+  let severityScore = 0;
+  const abnormalMarkers = [];
+
+  if (hba1c >= 9.0) {
+    severityScore += 35;
+    abnormalMarkers.push('Severe Diabetes (HbA1c >= 9.0%)');
+  } else if (hba1c >= 6.5) {
+    severityScore += 20;
+    abnormalMarkers.push('Elevated HbA1c (Diabetic Range)');
+  }
+
+  if (glucose >= 200) {
+    severityScore += 25;
+    abnormalMarkers.push('Severe Hyperglycemia');
+  } else if (glucose >= 126) {
+    severityScore += 15;
+    abnormalMarkers.push('High Fasting Glucose');
+  }
+
+  if (creatinine >= 2.0) {
+    severityScore += 30;
+    abnormalMarkers.push('Impaired Renal Function (High Creatinine)');
+  } else if (creatinine > 1.3) {
+    severityScore += 15;
+    abnormalMarkers.push('Mildly Elevated Creatinine');
+  }
+
+  if (alt >= 100) {
+    severityScore += 20;
+    abnormalMarkers.push('Elevated ALT (Hepatic Stress)');
+  }
+
+  const finalScore = Math.min(100, severityScore);
+  let severityTier = 'NORMAL';
+  if (finalScore >= 50) severityTier = 'HIGH_SEVERITY';
+  else if (finalScore >= 20) severityTier = 'MODERATE_SEVERITY';
+
+  return {
+    valid: true,
+    hba1cPct: hba1c,
+    fastingGlucoseMgDl: glucose,
+    creatinineMgDl: creatinine,
+    altLiverEnzymeUL: alt,
+    severityScore: finalScore,
+    severityTier,
+    abnormalMarkers,
+    isFollowUpRequired: finalScore >= 20,
+    recommendation: severityTier === 'HIGH_SEVERITY'
+      ? `HIGH SEVERITY LAB RESULTS (${abnormalMarkers.join(', ')}). Immediate physician consultation and dose adjustment required.`
+      : severityTier === 'MODERATE_SEVERITY'
+      ? `MODERATE SEVERITY (${abnormalMarkers.join(', ')}). Schedule follow-up lab review.`
+      : 'All primary lab biomarkers are within normal reference ranges.'
+  };
+}
+
 
 
 
