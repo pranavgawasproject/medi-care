@@ -1089,6 +1089,50 @@ export function calculatePatientChronicConditionComplexityIndex({
   };
 }
 
+export function calculatePatientMedicationRefillAdherenceScore({
+  totalPrescriptions = 3,
+  refilledOnTimeCount = 3,
+  missedDosesPastMonth = 0,
+  refillDelayDaysAvg = 0
+} = {}) {
+  if (typeof totalPrescriptions !== 'number' || totalPrescriptions <= 0 || isNaN(totalPrescriptions)) {
+    return { valid: false, error: 'Total prescriptions must be a positive number' };
+  }
+
+  const onTime = typeof refilledOnTimeCount === 'number' && refilledOnTimeCount >= 0 ? Math.min(refilledOnTimeCount, totalPrescriptions) : 0;
+  const missed = typeof missedDosesPastMonth === 'number' && missedDosesPastMonth >= 0 ? missedDosesPastMonth : 0;
+  const delay = typeof refillDelayDaysAvg === 'number' && refillDelayDaysAvg >= 0 ? refillDelayDaysAvg : 0;
+
+  const refillOnTimeRate = (onTime / totalPrescriptions) * 100;
+  let score = refillOnTimeRate - (missed * 5) - (delay * 3);
+  score = Math.max(0, Math.min(100, Math.round(score)));
+
+  let adherenceTier = 'HIGH_ADHERENCE';
+  if (score < 50) adherenceTier = 'POOR_ADHERENCE';
+  else if (score < 80) adherenceTier = 'MODERATE_RISK';
+
+  let recommendation = 'Optimal medication adherence. Continue routine refills.';
+  if (adherenceTier === 'POOR_ADHERENCE') {
+    recommendation = 'HIGH CLINICAL RISK: Severe non-adherence detected. Pharmacist consultation and automated SMS pill reminders required.';
+  } else if (adherenceTier === 'MODERATE_RISK') {
+    recommendation = 'MODERATE RISK: Occasional missed doses or refill delays. Recommend setting up auto-refills.';
+  }
+
+  return {
+    valid: true,
+    totalPrescriptions,
+    refilledOnTimeCount: onTime,
+    missedDosesPastMonth: missed,
+    refillDelayDaysAvg: delay,
+    refillOnTimeRate: Math.round(refillOnTimeRate),
+    adherenceScore: score,
+    adherenceTier,
+    isInterventionRequired: adherenceTier === 'POOR_ADHERENCE',
+    recommendation
+  };
+}
+
+
 
 
 
