@@ -1185,6 +1185,83 @@ export function calculatePatientMedicationStorageTemperatureSafety({
   };
 }
 
+export function calculatePatientVitalSignAnomalyAlertScore({
+  systolicBp = 120,
+  diastolicBp = 80,
+  heartRateBpm = 72,
+  oxygenSaturationPct = 98,
+  bodyTemperatureC = 37.0
+} = {}) {
+  const sbp = typeof systolicBp === 'number' && !isNaN(systolicBp) ? systolicBp : 120;
+  const dbp = typeof diastolicBp === 'number' && !isNaN(diastolicBp) ? diastolicBp : 80;
+  const hr = typeof heartRateBpm === 'number' && !isNaN(heartRateBpm) ? heartRateBpm : 72;
+  const spo2 = typeof oxygenSaturationPct === 'number' && !isNaN(oxygenSaturationPct) ? oxygenSaturationPct : 98;
+  const temp = typeof bodyTemperatureC === 'number' && !isNaN(bodyTemperatureC) ? bodyTemperatureC : 37.0;
+
+  let anomalyScore = 0;
+  const warnings = [];
+
+  if (sbp >= 180 || dbp >= 120) {
+    anomalyScore += 40;
+    warnings.push('Hypertensive Crisis');
+  } else if (sbp >= 140 || dbp >= 90) {
+    anomalyScore += 20;
+    warnings.push('Elevated Blood Pressure');
+  } else if (sbp < 90) {
+    anomalyScore += 30;
+    warnings.push('Hypotension');
+  }
+
+  if (spo2 < 90) {
+    anomalyScore += 40;
+    warnings.push('Severe Hypoxia');
+  } else if (spo2 < 95) {
+    anomalyScore += 20;
+    warnings.push('Mild Hypoxia');
+  }
+
+  if (hr > 120) {
+    anomalyScore += 20;
+    warnings.push('Tachycardia');
+  } else if (hr < 50) {
+    anomalyScore += 20;
+    warnings.push('Bradycardia');
+  }
+
+  if (temp >= 39.0) {
+    anomalyScore += 20;
+    warnings.push('High Fever');
+  } else if (temp < 35.0) {
+    anomalyScore += 30;
+    warnings.push('Hypothermia');
+  }
+
+  const finalScore = Math.min(100, anomalyScore);
+  let alertTier = 'NORMAL';
+  if (finalScore >= 60) alertTier = 'CRITICAL_ALERT';
+  else if (finalScore >= 30) alertTier = 'WARNING';
+  else if (finalScore > 0) alertTier = 'MILD_ANOMALY';
+
+  return {
+    valid: true,
+    systolicBp: sbp,
+    diastolicBp: dbp,
+    heartRateBpm: hr,
+    oxygenSaturationPct: spo2,
+    bodyTemperatureC: temp,
+    anomalyScore: finalScore,
+    alertTier,
+    isUrgentCareNeeded: alertTier === 'CRITICAL_ALERT',
+    warnings,
+    recommendation: alertTier === 'CRITICAL_ALERT'
+      ? `CRITICAL CLINICAL ALERT: Severe vital sign anomalies (${warnings.join(', ')}). Dispatch emergency response or immediate triage.`
+      : alertTier === 'WARNING'
+      ? `CLINICAL WARNING: Vital sign deviations (${warnings.join(', ')}). Monitor patient and schedule physician review.`
+      : 'Patient vital signs are within normal clinical thresholds.'
+  };
+}
+
+
 
 
 
