@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 import test from 'node:test';
-import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore, calculateMedicationInteractionRiskScore, calculatePatientVitalSignStabilityIndex, calculatePatientAppointmentTriagePriority, calculatePatientPrescriptionRefillRiskIndex, calculatePatientPolypharmacyRiskIndex, calculatePatientReadmissionRiskScore, calculatePatientMedicationAdherenceTier, calculatePatientEmergencyRiskScore, calculatePatientAppointmentNoShowProbability, calculatePatientChronicConditionComplexityIndex, calculatePatientMedicationRefillAdherenceScore, calculatePatientMedicationStorageTemperatureSafety, calculatePatientVitalSignAnomalyAlertScore, calculatePatientLabTestResultSeverityScore } from '../src/utils/medicationUtils.js';
+import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore, calculateMedicationInteractionRiskScore, calculatePatientVitalSignStabilityIndex, calculatePatientAppointmentTriagePriority, calculatePatientPrescriptionRefillRiskIndex, calculatePatientPolypharmacyRiskIndex, calculatePatientReadmissionRiskScore, calculatePatientMedicationAdherenceTier, calculatePatientEmergencyRiskScore, calculatePatientAppointmentNoShowProbability, calculatePatientChronicConditionComplexityIndex, calculatePatientMedicationRefillAdherenceScore, calculatePatientMedicationStorageTemperatureSafety, calculatePatientVitalSignAnomalyAlertScore, calculatePatientLabTestResultSeverityScore, calculateTelehealthSlotOptimizationIndex } from '../src/utils/medicationUtils.js';
 
 
 
@@ -598,6 +598,31 @@ test('calculatePatientLabTestResultSeverityScore', () => {
   assert.strictEqual(severe.severityTier, 'HIGH_SEVERITY');
   assert.strictEqual(severe.isFollowUpRequired, true);
   assert.ok(severe.abnormalMarkers.length >= 3);
+});
+
+test('calculateTelehealthSlotOptimizationIndex', () => {
+  const optimal = calculateTelehealthSlotOptimizationIndex({
+    totalDoctors: 5,
+    totalPatientAppointments: 30,
+    maxSlotsPerDoctorDay: 10
+  });
+  assert.strictEqual(optimal.valid, true);
+  assert.strictEqual(optimal.utilizationPct, 60);
+  assert.strictEqual(optimal.capacityStatus, 'OPTIMAL');
+  assert.ok(optimal.recommendation.includes('optimal efficiency'));
+
+  const overbooked = calculateTelehealthSlotOptimizationIndex({
+    totalDoctors: 5,
+    totalPatientAppointments: 48,
+    maxSlotsPerDoctorDay: 10
+  });
+  assert.strictEqual(overbooked.valid, true);
+  assert.strictEqual(overbooked.capacityStatus, 'OVERBOOKED');
+  assert.ok(overbooked.recommendation.includes('overbooked'));
+
+  const invalid = calculateTelehealthSlotOptimizationIndex({ totalDoctors: 0 });
+  assert.strictEqual(invalid.valid, false);
+  assert.strictEqual(invalid.error, 'Total doctors count must be a positive number');
 });
 
 

@@ -1327,6 +1327,46 @@ export function calculatePatientLabTestResultSeverityScore({
   };
 }
 
+export function calculateTelehealthSlotOptimizationIndex({
+  totalDoctors = 5,
+  totalPatientAppointments = 45,
+  maxSlotsPerDoctorDay = 10,
+  averageConsultationDurationMins = 20
+} = {}) {
+  if (typeof totalDoctors !== 'number' || totalDoctors <= 0 || isNaN(totalDoctors)) {
+    return { valid: false, error: 'Total doctors count must be a positive number' };
+  }
+  if (typeof totalPatientAppointments !== 'number' || totalPatientAppointments < 0 || isNaN(totalPatientAppointments)) {
+    return { valid: false, error: 'Total patient appointments must be a non-negative number' };
+  }
+  if (typeof maxSlotsPerDoctorDay !== 'number' || maxSlotsPerDoctorDay <= 0 || isNaN(maxSlotsPerDoctorDay)) {
+    return { valid: false, error: 'Max slots per doctor day must be a positive number' };
+  }
+
+  const totalAvailableSlots = totalDoctors * maxSlotsPerDoctorDay;
+  const utilizationPct = Math.round((totalPatientAppointments / totalAvailableSlots) * 100 * 10) / 10;
+  const slotMarginPct = Math.round((100 - utilizationPct) * 10) / 10;
+
+  let capacityStatus = 'OPTIMAL';
+  if (utilizationPct > 85) capacityStatus = 'OVERBOOKED';
+  else if (utilizationPct < 40) capacityStatus = 'UNDERUTILIZED';
+
+  return {
+    valid: true,
+    totalDoctors,
+    totalAvailableSlots,
+    totalPatientAppointments,
+    utilizationPct,
+    slotMarginPct,
+    capacityStatus,
+    recommendation: capacityStatus === 'OVERBOOKED'
+      ? `Telehealth capacity overbooked (${utilizationPct}% utilization). Onboard additional physicians or expand daily slot limits.`
+      : capacityStatus === 'OPTIMAL'
+      ? `Telehealth capacity is operating at optimal efficiency (${utilizationPct}% utilization).`
+      : `Telehealth capacity underutilized (${utilizationPct}% utilization). Open additional patient booking windows.`
+  };
+}
+
 
 
 
