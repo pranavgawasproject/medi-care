@@ -1132,6 +1132,60 @@ export function calculatePatientMedicationRefillAdherenceScore({
   };
 }
 
+export function calculatePatientMedicationStorageTemperatureSafety({
+  storageTemperatureCelsius = 22.0,
+  minAllowedCelsius = 15.0,
+  maxAllowedCelsius = 25.0,
+  exposureDurationHours = 0,
+  isRefrigeratedItem = false
+} = {}) {
+  if (typeof storageTemperatureCelsius !== 'number' || isNaN(storageTemperatureCelsius)) {
+    return { valid: false, error: 'Storage temperature must be a valid number' };
+  }
+
+  const minTemp = typeof minAllowedCelsius === 'number' ? minAllowedCelsius : (isRefrigeratedItem ? 2.0 : 15.0);
+  const maxTemp = typeof maxAllowedCelsius === 'number' ? maxAllowedCelsius : (isRefrigeratedItem ? 8.0 : 25.0);
+  const duration = typeof exposureDurationHours === 'number' && exposureDurationHours >= 0 ? exposureDurationHours : 0;
+
+  const isExcursion = storageTemperatureCelsius < minTemp || storageTemperatureCelsius > maxTemp;
+  let safetyTier = 'OPTIMAL';
+  let isPotencyCompromised = false;
+
+  if (isExcursion) {
+    if (duration > 24 || storageTemperatureCelsius > maxTemp + 10 || storageTemperatureCelsius < minTemp - 10) {
+      safetyTier = 'CRITICAL_EXCURSION';
+      isPotencyCompromised = true;
+    } else if (duration > 4) {
+      safetyTier = 'MODERATE_EXCURSION';
+    } else {
+      safetyTier = 'MINOR_EXCURSION';
+    }
+  }
+
+  let recommendation = 'Storage temperature is within safe specification.';
+  if (safetyTier === 'CRITICAL_EXCURSION') {
+    recommendation = 'Potency likely compromised due to severe or prolonged temperature excursion. Replace medication immediately.';
+  } else if (safetyTier === 'MODERATE_EXCURSION') {
+    recommendation = 'Temperature excursion recorded. Consult pharmacist before administering.';
+  } else if (safetyTier === 'MINOR_EXCURSION') {
+    recommendation = 'Brief minor temperature drift. Return to recommended storage temperature range.';
+  }
+
+  return {
+    valid: true,
+    storageTemperatureCelsius,
+    minAllowedCelsius: minTemp,
+    maxAllowedCelsius: maxTemp,
+    exposureDurationHours: duration,
+    isRefrigeratedItem: Boolean(isRefrigeratedItem),
+    isExcursion,
+    safetyTier,
+    isPotencyCompromised,
+    recommendation
+  };
+}
+
+
 
 
 

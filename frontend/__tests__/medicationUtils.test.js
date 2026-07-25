@@ -1,6 +1,7 @@
 import assert from 'node:assert';
 import test from 'node:test';
-import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore, calculateMedicationInteractionRiskScore, calculatePatientVitalSignStabilityIndex, calculatePatientAppointmentTriagePriority, calculatePatientPrescriptionRefillRiskIndex, calculatePatientPolypharmacyRiskIndex, calculatePatientReadmissionRiskScore, calculatePatientMedicationAdherenceTier, calculatePatientEmergencyRiskScore, calculatePatientAppointmentNoShowProbability, calculatePatientChronicConditionComplexityIndex, calculatePatientMedicationRefillAdherenceScore } from '../src/utils/medicationUtils.js';
+import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore, calculateMedicationInteractionRiskScore, calculatePatientVitalSignStabilityIndex, calculatePatientAppointmentTriagePriority, calculatePatientPrescriptionRefillRiskIndex, calculatePatientPolypharmacyRiskIndex, calculatePatientReadmissionRiskScore, calculatePatientMedicationAdherenceTier, calculatePatientEmergencyRiskScore, calculatePatientAppointmentNoShowProbability, calculatePatientChronicConditionComplexityIndex, calculatePatientMedicationRefillAdherenceScore, calculatePatientMedicationStorageTemperatureSafety } from '../src/utils/medicationUtils.js';
+
 
 
 
@@ -522,6 +523,33 @@ test('calculatePatientMedicationRefillAdherenceScore', () => {
   const invalid = calculatePatientMedicationRefillAdherenceScore({ totalPrescriptions: 0 });
   assert.strictEqual(invalid.valid, false);
 });
+
+test('calculatePatientMedicationStorageTemperatureSafety', () => {
+  const optimal = calculatePatientMedicationStorageTemperatureSafety({
+    storageTemperatureCelsius: 20.0,
+    minAllowedCelsius: 15.0,
+    maxAllowedCelsius: 25.0
+  });
+  assert.strictEqual(optimal.valid, true);
+  assert.strictEqual(optimal.safetyTier, 'OPTIMAL');
+  assert.strictEqual(optimal.isExcursion, false);
+  assert.strictEqual(optimal.isPotencyCompromised, false);
+
+  const excursion = calculatePatientMedicationStorageTemperatureSafety({
+    storageTemperatureCelsius: 38.0,
+    minAllowedCelsius: 15.0,
+    maxAllowedCelsius: 25.0,
+    exposureDurationHours: 30
+  });
+  assert.strictEqual(excursion.valid, true);
+  assert.strictEqual(excursion.safetyTier, 'CRITICAL_EXCURSION');
+  assert.strictEqual(excursion.isExcursion, true);
+  assert.strictEqual(excursion.isPotencyCompromised, true);
+
+  const invalid = calculatePatientMedicationStorageTemperatureSafety({ storageTemperatureCelsius: NaN });
+  assert.strictEqual(invalid.valid, false);
+});
+
 
 
 
