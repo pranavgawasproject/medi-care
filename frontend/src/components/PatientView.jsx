@@ -53,7 +53,7 @@ export function PatientView({ doctors, appointments, onBook, onCancel, connected
   const [selectedDoctorId, setSelectedDoctorId] = useState(
     doctors[0]?.id ?? FALLBACK_DOCTORS[0].id
   )
-  const [bookingDate, setBookingDate] = useState('2026-07-01')
+  const [bookingDate, setBookingDate] = useState(() => new Date().toISOString().split('T')[0])
   const [selectedSlot, setSelectedSlot] = useState('09:30 AM')
 
   useEffect(() => {
