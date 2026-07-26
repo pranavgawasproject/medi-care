@@ -1408,6 +1408,43 @@ export function calculateTelehealthConsultationTriagingIndex({
   };
 }
 
+export function calculatePatientHealthScoreAndRiskTier({
+  vitalsStabilityIndex = 85,
+  adherenceRatePct = 90,
+  readmissionRiskScore = 20,
+  chronicConditionsCount = 1
+} = {}) {
+  const vitals = Math.min(100, Math.max(0, typeof vitalsStabilityIndex === 'number' ? vitalsStabilityIndex : 75));
+  const adherence = Math.min(100, Math.max(0, typeof adherenceRatePct === 'number' ? adherenceRatePct : 75));
+  const readmission = Math.min(100, Math.max(0, typeof readmissionRiskScore === 'number' ? readmissionRiskScore : 25));
+  const conditions = Math.max(0, typeof chronicConditionsCount === 'number' ? chronicConditionsCount : 0);
+
+  let rawScore = (vitals * 0.4) + (adherence * 0.4) + ((100 - readmission) * 0.2);
+  const conditionPenalty = Math.min(20, conditions * 5);
+
+  const healthScore = Math.min(100, Math.max(0, Math.round(rawScore - conditionPenalty)));
+
+  let riskTier = 'LOW_RISK';
+  if (healthScore < 50) riskTier = 'HIGH_RISK';
+  else if (healthScore < 75) riskTier = 'MODERATE_RISK';
+
+  return {
+    valid: true,
+    vitalsStabilityIndex: vitals,
+    adherenceRatePct: adherence,
+    readmissionRiskScore: readmission,
+    chronicConditionsCount: conditions,
+    healthScore,
+    riskTier,
+    recommendation: riskTier === 'LOW_RISK'
+      ? `Patient health score (${healthScore}/100) is stable with low readmission risk.`
+      : riskTier === 'MODERATE_RISK'
+      ? `Patient health score (${healthScore}/100) requires routine monitoring.`
+      : `High patient health risk (${healthScore}/100). Schedule clinical follow-up immediately.`
+  };
+}
+
+
 
 
 
