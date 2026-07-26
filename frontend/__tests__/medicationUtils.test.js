@@ -1,6 +1,7 @@
 import assert from 'node:assert';
 import test from 'node:test';
-import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore, calculateMedicationInteractionRiskScore, calculatePatientVitalSignStabilityIndex, calculatePatientAppointmentTriagePriority, calculatePatientPrescriptionRefillRiskIndex, calculatePatientPolypharmacyRiskIndex, calculatePatientReadmissionRiskScore, calculatePatientMedicationAdherenceTier, calculatePatientEmergencyRiskScore, calculatePatientAppointmentNoShowProbability, calculatePatientChronicConditionComplexityIndex, calculatePatientMedicationRefillAdherenceScore, calculatePatientMedicationStorageTemperatureSafety, calculatePatientVitalSignAnomalyAlertScore, calculatePatientLabTestResultSeverityScore, calculateTelehealthSlotOptimizationIndex, calculateTelehealthConsultationTriagingIndex, calculatePatientHealthScoreAndRiskTier, calculatePatientMedicationSideEffectRiskScore } from '../src/utils/medicationUtils.js';
+import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore, calculateMedicationInteractionRiskScore, calculatePatientVitalSignStabilityIndex, calculatePatientAppointmentTriagePriority, calculatePatientPrescriptionRefillRiskIndex, calculatePatientPolypharmacyRiskIndex, calculatePatientReadmissionRiskScore, calculatePatientMedicationAdherenceTier, calculatePatientEmergencyRiskScore, calculatePatientAppointmentNoShowProbability, calculatePatientChronicConditionComplexityIndex, calculatePatientMedicationRefillAdherenceScore, calculatePatientMedicationStorageTemperatureSafety, calculatePatientVitalSignAnomalyAlertScore, calculatePatientLabTestResultSeverityScore, calculateTelehealthSlotOptimizationIndex, calculateTelehealthConsultationTriagingIndex, calculatePatientHealthScoreAndRiskTier, calculatePatientMedicationSideEffectRiskScore, calculatePatientPediatricDosageSafety } from '../src/utils/medicationUtils.js';
+
 
 
 
@@ -672,6 +673,26 @@ test('calculatePatientMedicationSideEffectRiskScore', () => {
   assert.strictEqual(low.valid, true);
   assert.strictEqual(low.riskTier, 'LOW_RISK');
 });
+
+test('calculatePatientPediatricDosageSafety', () => {
+  const optimal = calculatePatientPediatricDosageSafety({
+    patientWeightKg: 15.0,
+    recommendedMgPerKg: 10.0,
+    prescribedSingleDoseMg: 150.0,
+    maxDailyMgPerKg: 40.0,
+    dailyDosesFrequency: 3
+  });
+  assert.strictEqual(optimal.valid, true);
+  assert.strictEqual(optimal.targetSingleDoseMg, 150.0);
+  assert.strictEqual(optimal.totalPrescribedDailyMg, 450.0);
+  assert.strictEqual(optimal.safetyStatus, 'OPTIMAL_DOSAGE');
+  assert.strictEqual(optimal.isOverdosed, false);
+
+  const invalid = calculatePatientPediatricDosageSafety({ patientWeightKg: -5 });
+  assert.strictEqual(invalid.valid, false);
+  assert.strictEqual(invalid.error, 'Patient weight must be a positive number');
+});
+
 
 
 

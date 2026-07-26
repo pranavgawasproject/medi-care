@@ -1485,6 +1485,58 @@ export function calculatePatientMedicationSideEffectRiskScore({
   };
 }
 
+export function calculatePatientPediatricDosageSafety({
+  patientWeightKg = 15.0,
+  recommendedMgPerKg = 10.0,
+  prescribedSingleDoseMg = 150.0,
+  maxDailyMgPerKg = 40.0,
+  dailyDosesFrequency = 3
+} = {}) {
+  if (typeof patientWeightKg !== 'number' || patientWeightKg <= 0 || isNaN(patientWeightKg)) {
+    return { valid: false, error: 'Patient weight must be a positive number' };
+  }
+  if (typeof recommendedMgPerKg !== 'number' || recommendedMgPerKg <= 0 || isNaN(recommendedMgPerKg)) {
+    return { valid: false, error: 'Recommended mg per kg must be a positive number' };
+  }
+
+  const targetSingleDoseMg = Math.round(patientWeightKg * recommendedMgPerKg * 100) / 100;
+  const totalPrescribedDailyMg = Math.round(prescribedSingleDoseMg * dailyDosesFrequency * 100) / 100;
+  const maxAllowableDailyMg = Math.round(patientWeightKg * maxDailyMgPerKg * 100) / 100;
+
+  const doseDeviationPct = Math.round(((prescribedSingleDoseMg - targetSingleDoseMg) / targetSingleDoseMg) * 100);
+  const isOverdosed = totalPrescribedDailyMg > maxAllowableDailyMg;
+  const isUnderdosed = prescribedSingleDoseMg < (targetSingleDoseMg * 0.7);
+
+  let safetyStatus = 'OPTIMAL_DOSAGE';
+  if (isOverdosed) {
+    safetyStatus = 'OVERDOSE_WARNING';
+  } else if (isUnderdosed) {
+    safetyStatus = 'SUB_THERAPEUTIC';
+  } else if (Math.abs(doseDeviationPct) > 15) {
+    safetyStatus = 'DOSAGE_ADJUSTMENT_ADVISED';
+  }
+
+  return {
+    valid: true,
+    patientWeightKg,
+    recommendedMgPerKg,
+    prescribedSingleDoseMg,
+    targetSingleDoseMg,
+    totalPrescribedDailyMg,
+    maxAllowableDailyMg,
+    doseDeviationPct,
+    isOverdosed,
+    isUnderdosed,
+    safetyStatus,
+    recommendation: isOverdosed
+      ? `CRITICAL: Prescribed daily dose (${totalPrescribedDailyMg}mg) exceeds maximum safe daily threshold (${maxAllowableDailyMg}mg).`
+      : isUnderdosed
+      ? `WARNING: Prescribed dose (${prescribedSingleDoseMg}mg) is sub-therapeutic. Recommended single dose is ${targetSingleDoseMg}mg.`
+      : `Pediatric dosage is safe and optimal (${targetSingleDoseMg}mg target).`
+  };
+}
+
+
 
 
 
