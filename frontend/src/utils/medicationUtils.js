@@ -1444,6 +1444,48 @@ export function calculatePatientHealthScoreAndRiskTier({
   };
 }
 
+export function calculatePatientMedicationSideEffectRiskScore({
+  activeMedicationCount = 4,
+  patientAgeYears = 65,
+  hasKidneyOrLiverImpairment = false,
+  knownAllergiesCount = 1,
+  highRiskMedClassCount = 1
+} = {}) {
+  const meds = Math.max(1, typeof activeMedicationCount === 'number' ? activeMedicationCount : 1);
+  const age = Math.max(0, typeof patientAgeYears === 'number' ? patientAgeYears : 45);
+  const allergies = Math.max(0, typeof knownAllergiesCount === 'number' ? knownAllergiesCount : 0);
+  const highRiskClasses = Math.max(0, typeof highRiskMedClassCount === 'number' ? highRiskMedClassCount : 0);
+
+  let medScore = Math.min(40, (meds / 10) * 40);
+  let ageScore = age >= 65 ? 20 : age >= 50 ? 10 : 0;
+  let organScore = hasKidneyOrLiverImpairment ? 20 : 0;
+  let allergyScore = Math.min(10, allergies * 5);
+  let classScore = Math.min(10, highRiskClasses * 5);
+
+  const sideEffectRiskScore = Math.min(100, Math.round(medScore + ageScore + organScore + allergyScore + classScore));
+
+  let riskTier = 'LOW_RISK';
+  if (sideEffectRiskScore >= 60) riskTier = 'HIGH_SIDE_EFFECT_RISK';
+  else if (sideEffectRiskScore >= 35) riskTier = 'MODERATE_SIDE_EFFECT_RISK';
+
+  return {
+    valid: true,
+    activeMedicationCount: meds,
+    patientAgeYears: age,
+    hasKidneyOrLiverImpairment: Boolean(hasKidneyOrLiverImpairment),
+    knownAllergiesCount: allergies,
+    highRiskMedClassCount: highRiskClasses,
+    sideEffectRiskScore,
+    riskTier,
+    recommendation: riskTier === 'HIGH_SIDE_EFFECT_RISK'
+      ? `High side-effect risk score (${sideEffectRiskScore}/100). Comprehensive clinical pharmacy review recommended.`
+      : riskTier === 'MODERATE_SIDE_EFFECT_RISK'
+      ? `Moderate side-effect risk score (${sideEffectRiskScore}/100). Monitor patient symptoms and lab values routinely.`
+      : `Low side-effect risk score (${sideEffectRiskScore}/100). Standard medication regimen.`
+  };
+}
+
+
 
 
 

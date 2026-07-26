@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 import test from 'node:test';
-import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore, calculateMedicationInteractionRiskScore, calculatePatientVitalSignStabilityIndex, calculatePatientAppointmentTriagePriority, calculatePatientPrescriptionRefillRiskIndex, calculatePatientPolypharmacyRiskIndex, calculatePatientReadmissionRiskScore, calculatePatientMedicationAdherenceTier, calculatePatientEmergencyRiskScore, calculatePatientAppointmentNoShowProbability, calculatePatientChronicConditionComplexityIndex, calculatePatientMedicationRefillAdherenceScore, calculatePatientMedicationStorageTemperatureSafety, calculatePatientVitalSignAnomalyAlertScore, calculatePatientLabTestResultSeverityScore, calculateTelehealthSlotOptimizationIndex, calculateTelehealthConsultationTriagingIndex, calculatePatientHealthScoreAndRiskTier } from '../src/utils/medicationUtils.js';
+import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore, calculateMedicationInteractionRiskScore, calculatePatientVitalSignStabilityIndex, calculatePatientAppointmentTriagePriority, calculatePatientPrescriptionRefillRiskIndex, calculatePatientPolypharmacyRiskIndex, calculatePatientReadmissionRiskScore, calculatePatientMedicationAdherenceTier, calculatePatientEmergencyRiskScore, calculatePatientAppointmentNoShowProbability, calculatePatientChronicConditionComplexityIndex, calculatePatientMedicationRefillAdherenceScore, calculatePatientMedicationStorageTemperatureSafety, calculatePatientVitalSignAnomalyAlertScore, calculatePatientLabTestResultSeverityScore, calculateTelehealthSlotOptimizationIndex, calculateTelehealthConsultationTriagingIndex, calculatePatientHealthScoreAndRiskTier, calculatePatientMedicationSideEffectRiskScore } from '../src/utils/medicationUtils.js';
 
 
 
@@ -649,6 +649,30 @@ test('calculatePatientHealthScoreAndRiskTier', () => {
   assert.strictEqual(highRisk.riskTier, 'HIGH_RISK');
   assert.ok(highRisk.recommendation.includes('Schedule clinical follow-up'));
 });
+
+test('calculatePatientMedicationSideEffectRiskScore', () => {
+  const high = calculatePatientMedicationSideEffectRiskScore({
+    activeMedicationCount: 8,
+    patientAgeYears: 72,
+    hasKidneyOrLiverImpairment: true,
+    knownAllergiesCount: 2,
+    highRiskMedClassCount: 2
+  });
+  assert.strictEqual(high.valid, true);
+  assert.strictEqual(high.sideEffectRiskScore, 92);
+  assert.strictEqual(high.riskTier, 'HIGH_SIDE_EFFECT_RISK');
+
+  const low = calculatePatientMedicationSideEffectRiskScore({
+    activeMedicationCount: 1,
+    patientAgeYears: 30,
+    hasKidneyOrLiverImpairment: false,
+    knownAllergiesCount: 0,
+    highRiskMedClassCount: 0
+  });
+  assert.strictEqual(low.valid, true);
+  assert.strictEqual(low.riskTier, 'LOW_RISK');
+});
+
 
 
 
