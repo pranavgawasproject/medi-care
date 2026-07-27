@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 import test from 'node:test';
-import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore, calculateMedicationInteractionRiskScore, calculatePatientVitalSignStabilityIndex, calculatePatientAppointmentTriagePriority, calculatePatientPrescriptionRefillRiskIndex, calculatePatientPolypharmacyRiskIndex, calculatePatientReadmissionRiskScore, calculatePatientMedicationAdherenceTier, calculatePatientEmergencyRiskScore, calculatePatientAppointmentNoShowProbability, calculatePatientChronicConditionComplexityIndex, calculatePatientMedicationRefillAdherenceScore, calculatePatientMedicationStorageTemperatureSafety, calculatePatientVitalSignAnomalyAlertScore, calculatePatientLabTestResultSeverityScore, calculateTelehealthSlotOptimizationIndex, calculateTelehealthConsultationTriagingIndex, calculatePatientHealthScoreAndRiskTier, calculatePatientMedicationSideEffectRiskScore, calculatePatientPediatricDosageSafety } from '../src/utils/medicationUtils.js';
+import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore, calculateMedicationInteractionRiskScore, calculatePatientVitalSignStabilityIndex, calculatePatientAppointmentTriagePriority, calculatePatientPrescriptionRefillRiskIndex, calculatePatientPolypharmacyRiskIndex, calculatePatientReadmissionRiskScore, calculatePatientMedicationAdherenceTier, calculatePatientEmergencyRiskScore, calculatePatientAppointmentNoShowProbability, calculatePatientChronicConditionComplexityIndex, calculatePatientMedicationRefillAdherenceScore, calculatePatientMedicationStorageTemperatureSafety, calculatePatientVitalSignAnomalyAlertScore, calculatePatientLabTestResultSeverityScore, calculateTelehealthSlotOptimizationIndex, calculateTelehealthConsultationTriagingIndex, calculatePatientHealthScoreAndRiskTier, calculatePatientMedicationSideEffectRiskScore, calculatePatientPediatricDosageSafety, calculatePatientRenalDoseAdjustment } from '../src/utils/medicationUtils.js';
 
 
 
@@ -691,6 +691,46 @@ test('calculatePatientPediatricDosageSafety', () => {
   const invalid = calculatePatientPediatricDosageSafety({ patientWeightKg: -5 });
   assert.strictEqual(invalid.valid, false);
   assert.strictEqual(invalid.error, 'Patient weight must be a positive number');
+});
+
+test('calculatePatientRenalDoseAdjustment - evaluates creatinine clearance and dose adjustment correctly', () => {
+  const normal = calculatePatientRenalDoseAdjustment({
+    serumCreatinineMgDl: 0.9,
+    patientAgeYears: 50,
+    patientWeightKg: 70,
+    isFemale: false,
+    standardDoseMg: 500
+  });
+  assert.strictEqual(normal.valid, true);
+  assert.strictEqual(normal.renalRiskTier, 'NORMAL_RENAL_FUNCTION');
+  assert.strictEqual(normal.adjustedDoseMg, 500);
+
+  const moderate = calculatePatientRenalDoseAdjustment({
+    serumCreatinineMgDl: 1.8,
+    patientAgeYears: 65,
+    patientWeightKg: 70,
+    isFemale: false,
+    standardDoseMg: 500
+  });
+  assert.strictEqual(moderate.valid, true);
+  assert.strictEqual(moderate.renalRiskTier, 'MODERATE_RENAL_IMPAIRMENT');
+  assert.strictEqual(moderate.adjustedDoseMg, 375);
+  assert.strictEqual(moderate.doseAdjustmentPct, 75);
+
+  const severe = calculatePatientRenalDoseAdjustment({
+    serumCreatinineMgDl: 3.5,
+    patientAgeYears: 75,
+    patientWeightKg: 65,
+    isFemale: true,
+    standardDoseMg: 500
+  });
+  assert.strictEqual(severe.valid, true);
+  assert.strictEqual(severe.renalRiskTier, 'SEVERE_RENAL_IMPAIRMENT');
+  assert.strictEqual(severe.adjustedDoseMg, 250);
+  assert.strictEqual(severe.doseAdjustmentPct, 50);
+
+  const invalid = calculatePatientRenalDoseAdjustment({ serumCreatinineMgDl: 0 });
+  assert.strictEqual(invalid.valid, false);
 });
 
 

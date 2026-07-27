@@ -1536,7 +1536,60 @@ export function calculatePatientPediatricDosageSafety({
   };
 }
 
+export function calculatePatientRenalDoseAdjustment({
+  serumCreatinineMgDl = 1.0,
+  patientAgeYears = 60,
+  patientWeightKg = 70.0,
+  isFemale = false,
+  standardDoseMg = 500.0
+} = {}) {
+  if (
+    typeof serumCreatinineMgDl !== 'number' || serumCreatinineMgDl <= 0 || isNaN(serumCreatinineMgDl) ||
+    typeof patientAgeYears !== 'number' || patientAgeYears <= 0 || isNaN(patientAgeYears) ||
+    typeof patientWeightKg !== 'number' || patientWeightKg <= 0 || isNaN(patientWeightKg) ||
+    typeof standardDoseMg !== 'number' || standardDoseMg <= 0 || isNaN(standardDoseMg)
+  ) {
+    return { valid: false, error: 'Serum creatinine, age, weight, and standard dose must be positive numbers' };
+  }
 
+  const femaleFactor = isFemale ? 0.85 : 1.0;
+  const crClRaw = (((140 - patientAgeYears) * patientWeightKg) / (72 * serumCreatinineMgDl)) * femaleFactor;
+  const creatinineClearanceMlMin = Math.round(crClRaw * 100) / 100;
+
+  let renalRiskTier = 'NORMAL_RENAL_FUNCTION';
+  let doseAdjustmentPct = 100;
+
+  if (creatinineClearanceMlMin < 30) {
+    renalRiskTier = 'SEVERE_RENAL_IMPAIRMENT';
+    doseAdjustmentPct = 50;
+  } else if (creatinineClearanceMlMin < 60) {
+    renalRiskTier = 'MODERATE_RENAL_IMPAIRMENT';
+    doseAdjustmentPct = 75;
+  } else if (creatinineClearanceMlMin < 90) {
+    renalRiskTier = 'MILD_RENAL_IMPAIRMENT';
+    doseAdjustmentPct = 100;
+  }
+
+  const adjustedDoseMg = Math.round((standardDoseMg * (doseAdjustmentPct / 100)) * 100) / 100;
+
+  return {
+    valid: true,
+    serumCreatinineMgDl,
+    patientAgeYears,
+    patientWeightKg,
+    isFemale,
+    standardDoseMg,
+    creatinineClearanceMlMin,
+    renalRiskTier,
+    doseAdjustmentPct,
+    adjustedDoseMg,
+    recommendation: renalRiskTier === 'SEVERE_RENAL_IMPAIRMENT'
+      ? `CRITICAL: Severe renal impairment (CrCl: ${creatinineClearanceMlMin} mL/min). Reduce standard dose to 50% (${adjustedDoseMg}mg).`
+      : renalRiskTier === 'MODERATE_RENAL_IMPAIRMENT'
+      ? `WARNING: Moderate renal impairment (CrCl: ${creatinineClearanceMlMin} mL/min). Reduce standard dose to 75% (${adjustedDoseMg}mg).`
+      : `Renal clearance normal (CrCl: ${creatinineClearanceMlMin} mL/min). Standard dose (${standardDoseMg}mg) recommended.`
+  };
+}
 
 
 
