@@ -1632,6 +1632,51 @@ export function calculatePatientAnticholinergicCognitiveRiskScore({
   };
 }
 
+export function calculatePatientPolypharmacyInteractionIndex({
+  totalActiveMedications = 5,
+  majorInteractionPairsCount = 0,
+  moderateInteractionPairsCount = 1,
+  patientAgeYears = 68,
+  renalImpairmentPresent = false
+} = {}) {
+  if (typeof totalActiveMedications !== 'number' || totalActiveMedications < 0 || isNaN(totalActiveMedications)) {
+    return { valid: false, error: 'Total active medications must be a non-negative number' };
+  }
+  if (typeof patientAgeYears !== 'number' || patientAgeYears < 0 || isNaN(patientAgeYears)) {
+    return { valid: false, error: 'Patient age must be a non-negative number' };
+  }
+
+  const medBaseScore = Math.min(40, totalActiveMedications * 5);
+  const majorScore = Math.min(40, (majorInteractionPairsCount || 0) * 20);
+  const moderateScore = Math.min(20, (moderateInteractionPairsCount || 0) * 5);
+  const ageBonus = patientAgeYears >= 65 ? 10 : 0;
+  const renalBonus = renalImpairmentPresent ? 10 : 0;
+
+  const polypharmacyScore = Math.min(100, Math.round(medBaseScore + majorScore + moderateScore + ageBonus + renalBonus));
+
+  let riskTier = 'LOW_POLYPHARMACY_RISK';
+  if (polypharmacyScore >= 70) riskTier = 'HIGH_POLYPHARMACY_RISK';
+  else if (polypharmacyScore >= 40) riskTier = 'MODERATE_POLYPHARMACY_RISK';
+
+  return {
+    valid: true,
+    totalActiveMedications,
+    majorInteractionPairsCount,
+    moderateInteractionPairsCount,
+    patientAgeYears,
+    renalImpairmentPresent: Boolean(renalImpairmentPresent),
+    polypharmacyScore,
+    riskTier,
+    requiresPharmacistConsultation: riskTier === 'HIGH_POLYPHARMACY_RISK',
+    recommendation: riskTier === 'HIGH_POLYPHARMACY_RISK'
+      ? `HIGH RISK: Polypharmacy interaction score (${polypharmacyScore}/100). Immediate comprehensive medication reconciliation and clinical pharmacist consultation required.`
+      : riskTier === 'MODERATE_POLYPHARMACY_RISK'
+      ? `MODERATE RISK: Polypharmacy interaction score (${polypharmacyScore}/100). Regular medication review recommended at next clinic visit.`
+      : `Low polypharmacy interaction risk (${polypharmacyScore}/100).`
+  };
+}
+
+
 
 
 

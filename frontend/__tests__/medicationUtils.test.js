@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 import test from 'node:test';
-import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore, calculateMedicationInteractionRiskScore, calculatePatientVitalSignStabilityIndex, calculatePatientAppointmentTriagePriority, calculatePatientPrescriptionRefillRiskIndex, calculatePatientPolypharmacyRiskIndex, calculatePatientReadmissionRiskScore, calculatePatientMedicationAdherenceTier, calculatePatientEmergencyRiskScore, calculatePatientAppointmentNoShowProbability, calculatePatientChronicConditionComplexityIndex, calculatePatientMedicationRefillAdherenceScore, calculatePatientMedicationStorageTemperatureSafety, calculatePatientVitalSignAnomalyAlertScore, calculatePatientLabTestResultSeverityScore, calculateTelehealthSlotOptimizationIndex, calculateTelehealthConsultationTriagingIndex, calculatePatientHealthScoreAndRiskTier, calculatePatientMedicationSideEffectRiskScore, calculatePatientPediatricDosageSafety, calculatePatientRenalDoseAdjustment, calculatePatientAnticholinergicCognitiveRiskScore } from '../src/utils/medicationUtils.js';
+import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore, calculateMedicationInteractionRiskScore, calculatePatientVitalSignStabilityIndex, calculatePatientAppointmentTriagePriority, calculatePatientPrescriptionRefillRiskIndex, calculatePatientPolypharmacyRiskIndex, calculatePatientReadmissionRiskScore, calculatePatientMedicationAdherenceTier, calculatePatientEmergencyRiskScore, calculatePatientAppointmentNoShowProbability, calculatePatientChronicConditionComplexityIndex, calculatePatientMedicationRefillAdherenceScore, calculatePatientMedicationStorageTemperatureSafety, calculatePatientVitalSignAnomalyAlertScore, calculatePatientLabTestResultSeverityScore, calculateTelehealthSlotOptimizationIndex, calculateTelehealthConsultationTriagingIndex, calculatePatientHealthScoreAndRiskTier, calculatePatientMedicationSideEffectRiskScore, calculatePatientPediatricDosageSafety, calculatePatientRenalDoseAdjustment, calculatePatientAnticholinergicCognitiveRiskScore, calculatePatientPolypharmacyInteractionIndex } from '../src/utils/medicationUtils.js';
 
 
 
@@ -758,6 +758,35 @@ test('calculatePatientAnticholinergicCognitiveRiskScore - evaluates cognitive ri
   const invalid = calculatePatientAnticholinergicCognitiveRiskScore({ anticholinergicMedsCount: -1 });
   assert.strictEqual(invalid.valid, false);
 });
+
+test('calculatePatientPolypharmacyInteractionIndex', () => {
+  const high = calculatePatientPolypharmacyInteractionIndex({
+    totalActiveMedications: 8,
+    majorInteractionPairsCount: 2,
+    moderateInteractionPairsCount: 2,
+    patientAgeYears: 72,
+    renalImpairmentPresent: true
+  });
+  assert.strictEqual(high.valid, true);
+  assert.strictEqual(high.polypharmacyScore, 100);
+  assert.strictEqual(high.riskTier, 'HIGH_POLYPHARMACY_RISK');
+  assert.strictEqual(high.requiresPharmacistConsultation, true);
+
+  const low = calculatePatientPolypharmacyInteractionIndex({
+    totalActiveMedications: 2,
+    majorInteractionPairsCount: 0,
+    moderateInteractionPairsCount: 0,
+    patientAgeYears: 40,
+    renalImpairmentPresent: false
+  });
+  assert.strictEqual(low.valid, true);
+  assert.strictEqual(low.polypharmacyScore, 10);
+  assert.strictEqual(low.riskTier, 'LOW_POLYPHARMACY_RISK');
+
+  const invalid = calculatePatientPolypharmacyInteractionIndex({ totalActiveMedications: -1 });
+  assert.strictEqual(invalid.valid, false);
+});
+
 
 
 
