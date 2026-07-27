@@ -1,6 +1,7 @@
 import assert from 'node:assert';
 import test from 'node:test';
-import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore, calculateMedicationInteractionRiskScore, calculatePatientVitalSignStabilityIndex, calculatePatientAppointmentTriagePriority, calculatePatientPrescriptionRefillRiskIndex, calculatePatientPolypharmacyRiskIndex, calculatePatientReadmissionRiskScore, calculatePatientMedicationAdherenceTier, calculatePatientEmergencyRiskScore, calculatePatientAppointmentNoShowProbability, calculatePatientChronicConditionComplexityIndex, calculatePatientMedicationRefillAdherenceScore, calculatePatientMedicationStorageTemperatureSafety, calculatePatientVitalSignAnomalyAlertScore, calculatePatientLabTestResultSeverityScore, calculateTelehealthSlotOptimizationIndex, calculateTelehealthConsultationTriagingIndex, calculatePatientHealthScoreAndRiskTier, calculatePatientMedicationSideEffectRiskScore, calculatePatientPediatricDosageSafety, calculatePatientRenalDoseAdjustment } from '../src/utils/medicationUtils.js';
+import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore, calculateMedicationInteractionRiskScore, calculatePatientVitalSignStabilityIndex, calculatePatientAppointmentTriagePriority, calculatePatientPrescriptionRefillRiskIndex, calculatePatientPolypharmacyRiskIndex, calculatePatientReadmissionRiskScore, calculatePatientMedicationAdherenceTier, calculatePatientEmergencyRiskScore, calculatePatientAppointmentNoShowProbability, calculatePatientChronicConditionComplexityIndex, calculatePatientMedicationRefillAdherenceScore, calculatePatientMedicationStorageTemperatureSafety, calculatePatientVitalSignAnomalyAlertScore, calculatePatientLabTestResultSeverityScore, calculateTelehealthSlotOptimizationIndex, calculateTelehealthConsultationTriagingIndex, calculatePatientHealthScoreAndRiskTier, calculatePatientMedicationSideEffectRiskScore, calculatePatientPediatricDosageSafety, calculatePatientRenalDoseAdjustment, calculatePatientAnticholinergicCognitiveRiskScore } from '../src/utils/medicationUtils.js';
+
 
 
 
@@ -732,6 +733,33 @@ test('calculatePatientRenalDoseAdjustment - evaluates creatinine clearance and d
   const invalid = calculatePatientRenalDoseAdjustment({ serumCreatinineMgDl: 0 });
   assert.strictEqual(invalid.valid, false);
 });
+
+test('calculatePatientAnticholinergicCognitiveRiskScore - evaluates cognitive risk score and tier', () => {
+  const high = calculatePatientAnticholinergicCognitiveRiskScore({
+    anticholinergicMedsCount: 3,
+    patientAgeYears: 78,
+    hasBaselineCognitiveImpairment: true,
+    treatmentDurationMonths: 12
+  });
+  assert.strictEqual(high.valid, true);
+  assert.strictEqual(high.cognitiveRiskScore, 100);
+  assert.strictEqual(high.riskTier, 'HIGH_COGNITIVE_RISK');
+  assert.ok(high.recommendation.includes('HIGH RISK: Anticholinergic cognitive risk score'));
+
+  const low = calculatePatientAnticholinergicCognitiveRiskScore({
+    anticholinergicMedsCount: 0,
+    patientAgeYears: 50,
+    hasBaselineCognitiveImpairment: false
+  });
+  assert.strictEqual(low.valid, true);
+  assert.strictEqual(low.cognitiveRiskScore, 0);
+  assert.strictEqual(low.riskTier, 'LOW_COGNITIVE_RISK');
+
+  const invalid = calculatePatientAnticholinergicCognitiveRiskScore({ anticholinergicMedsCount: -1 });
+  assert.strictEqual(invalid.valid, false);
+});
+
+
 
 
 

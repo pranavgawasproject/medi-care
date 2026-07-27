@@ -1591,6 +1591,49 @@ export function calculatePatientRenalDoseAdjustment({
   };
 }
 
+export function calculatePatientAnticholinergicCognitiveRiskScore({
+  anticholinergicMedsCount = 2,
+  patientAgeYears = 70,
+  hasBaselineCognitiveImpairment = false,
+  treatmentDurationMonths = 6
+} = {}) {
+  if (typeof anticholinergicMedsCount !== 'number' || anticholinergicMedsCount < 0 || isNaN(anticholinergicMedsCount)) {
+    return { valid: false, error: 'Anticholinergic medication count must be a non-negative number' };
+  }
+  if (typeof patientAgeYears !== 'number' || patientAgeYears < 0 || isNaN(patientAgeYears)) {
+    return { valid: false, error: 'Patient age must be a non-negative number' };
+  }
+
+  let medScore = Math.min(50, anticholinergicMedsCount * 25);
+  let ageScore = patientAgeYears >= 75 ? 25 : patientAgeYears >= 65 ? 15 : 0;
+  let cognitiveScore = hasBaselineCognitiveImpairment ? 20 : 0;
+  let durationScore = anticholinergicMedsCount > 0 ? Math.min(10, (treatmentDurationMonths || 0) * 1) : 0;
+
+
+  const cognitiveRiskScore = Math.min(100, Math.round(medScore + ageScore + cognitiveScore + durationScore));
+
+  let riskTier = 'LOW_COGNITIVE_RISK';
+  if (cognitiveRiskScore >= 70) riskTier = 'HIGH_COGNITIVE_RISK';
+  else if (cognitiveRiskScore >= 40) riskTier = 'MODERATE_COGNITIVE_RISK';
+
+  return {
+    valid: true,
+    anticholinergicMedsCount,
+    patientAgeYears,
+    hasBaselineCognitiveImpairment: Boolean(hasBaselineCognitiveImpairment),
+    treatmentDurationMonths,
+    cognitiveRiskScore,
+    riskTier,
+    recommendation: riskTier === 'HIGH_COGNITIVE_RISK'
+      ? `HIGH RISK: Anticholinergic cognitive risk score (${cognitiveRiskScore}/100). High probability of cognitive decline or confusion; evaluate alternative non-anticholinergic therapies.`
+      : riskTier === 'MODERATE_COGNITIVE_RISK'
+      ? `MODERATE RISK: Anticholinergic cognitive risk score (${cognitiveRiskScore}/100). Monitor cognitive performance and memory periodically.`
+      : `Anticholinergic cognitive burden is low (${cognitiveRiskScore}/100).`
+  };
+}
+
+
+
 
 
 
