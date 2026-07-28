@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 import test from 'node:test';
-import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore, calculateMedicationInteractionRiskScore, calculatePatientVitalSignStabilityIndex, calculatePatientAppointmentTriagePriority, calculatePatientPrescriptionRefillRiskIndex, calculatePatientPolypharmacyRiskIndex, calculatePatientReadmissionRiskScore, calculatePatientMedicationAdherenceTier, calculatePatientEmergencyRiskScore, calculatePatientAppointmentNoShowProbability, calculatePatientChronicConditionComplexityIndex, calculatePatientMedicationRefillAdherenceScore, calculatePatientMedicationStorageTemperatureSafety, calculatePatientVitalSignAnomalyAlertScore, calculatePatientLabTestResultSeverityScore, calculateTelehealthSlotOptimizationIndex, calculateTelehealthConsultationTriagingIndex, calculatePatientHealthScoreAndRiskTier, calculatePatientMedicationSideEffectRiskScore, calculatePatientPediatricDosageSafety, calculatePatientRenalDoseAdjustment, calculatePatientAnticholinergicCognitiveRiskScore, calculatePatientPolypharmacyInteractionIndex } from '../src/utils/medicationUtils.js';
+import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore, calculateMedicationInteractionRiskScore, calculatePatientVitalSignStabilityIndex, calculatePatientAppointmentTriagePriority, calculatePatientPrescriptionRefillRiskIndex, calculatePatientPolypharmacyRiskIndex, calculatePatientReadmissionRiskScore, calculatePatientMedicationAdherenceTier, calculatePatientEmergencyRiskScore, calculatePatientAppointmentNoShowProbability, calculatePatientChronicConditionComplexityIndex, calculatePatientMedicationRefillAdherenceScore, calculatePatientMedicationStorageTemperatureSafety, calculatePatientVitalSignAnomalyAlertScore, calculatePatientLabTestResultSeverityScore, calculateTelehealthSlotOptimizationIndex, calculateTelehealthConsultationTriagingIndex, calculatePatientHealthScoreAndRiskTier, calculatePatientMedicationSideEffectRiskScore, calculatePatientPediatricDosageSafety, calculatePatientRenalDoseAdjustment, calculatePatientAnticholinergicCognitiveRiskScore, calculatePatientPolypharmacyInteractionIndex, calculatePatientGeriatricMedicationSafetyAudit } from '../src/utils/medicationUtils.js';
 
 
 
@@ -786,6 +786,30 @@ test('calculatePatientPolypharmacyInteractionIndex', () => {
   const invalid = calculatePatientPolypharmacyInteractionIndex({ totalActiveMedications: -1 });
   assert.strictEqual(invalid.valid, false);
 });
+
+test('calculatePatientGeriatricMedicationSafetyAudit — computes safety score and risk tier', () => {
+  const lowRisk = calculatePatientGeriatricMedicationSafetyAudit({
+    medicationList: [{ name: 'Amlodipine', category: 'antihypertensive' }],
+    patientAge: 68,
+    estimatedCrCl: 80,
+    hasHistoryOfFalls: false
+  });
+  assert.strictEqual(lowRisk.valid, true);
+  assert.strictEqual(lowRisk.riskTier, 'LOW_GERIATRIC_RISK');
+
+  const highRisk = calculatePatientGeriatricMedicationSafetyAudit({
+    medicationList: [{ name: 'Diazepam', category: 'sedative benzodiazepine' }, { name: 'Diphenhydramine', category: 'anticholinergic' }],
+    patientAge: 78,
+    estimatedCrCl: 40,
+    hasHistoryOfFalls: true
+  });
+  assert.strictEqual(highRisk.valid, true);
+  assert.strictEqual(highRisk.riskTier, 'HIGH_GERIATRIC_RISK');
+
+  const invalid = calculatePatientGeriatricMedicationSafetyAudit({ patientAge: -5 });
+  assert.strictEqual(invalid.valid, false);
+});
+
 
 
 

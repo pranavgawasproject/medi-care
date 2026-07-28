@@ -1676,6 +1676,62 @@ export function calculatePatientPolypharmacyInteractionIndex({
   };
 }
 
+export function calculatePatientGeriatricMedicationSafetyAudit({
+  medicationList = [],
+  patientAge = 70,
+  estimatedCrCl = 60,
+  hasHistoryOfFalls = false
+} = {}) {
+  if (!Array.isArray(medicationList)) {
+    return { valid: false, error: 'Medication list must be an array' };
+  }
+  if (typeof patientAge !== 'number' || patientAge < 0) {
+    return { valid: false, error: 'Patient age must be a non-negative number' };
+  }
+
+  const beersHighRiskClasses = ['sedative', 'anticholinergic', 'nsaid', 'benzodiazepine', 'antipsychotic'];
+  let highRiskMedsCount = 0;
+  let fallRiskMedsCount = 0;
+
+  for (const med of medicationList) {
+    if (!med) continue;
+    const cat = ((typeof med === 'string' ? med : med.category || med.name) || '').toLowerCase();
+    const isBeersRisk = beersHighRiskClasses.some(c => cat.includes(c));
+    if (isBeersRisk) highRiskMedsCount++;
+
+    if (cat.includes('sedative') || cat.includes('benzodiazepine') || cat.includes('antihistamine') || med.causesDrowsiness) {
+      fallRiskMedsCount++;
+    }
+  }
+
+  const ageFactor = patientAge >= 75 ? 15 : (patientAge >= 65 ? 10 : 0);
+  const fallPenalty = hasHistoryOfFalls ? 15 : 0;
+  const renalPenalty = estimatedCrCl < 50 ? 15 : 0;
+  const medRiskPenalty = highRiskMedsCount * 15 + fallRiskMedsCount * 10;
+
+  const geriatricSafetyScore = Math.max(0, Math.min(100, Math.round(100 - (ageFactor + fallPenalty + renalPenalty + medRiskPenalty))));
+
+  let riskTier = 'LOW_GERIATRIC_RISK';
+  if (geriatricSafetyScore < 50) riskTier = 'HIGH_GERIATRIC_RISK';
+  else if (geriatricSafetyScore < 75) riskTier = 'MODERATE_GERIATRIC_RISK';
+
+  return {
+    valid: true,
+    patientAge,
+    totalMedicationsAnalyzed: medicationList.length,
+    highRiskMedsCount,
+    fallRiskMedsCount,
+    geriatricSafetyScore,
+    riskTier,
+    recommendation: riskTier === 'LOW_GERIATRIC_RISK'
+      ? `Geriatric medication safety score is optimal (${geriatricSafetyScore}/100). Low Beers criteria risk.`
+      : riskTier === 'MODERATE_GERIATRIC_RISK'
+      ? `Moderate geriatric risk (${geriatricSafetyScore}/100). Review sedative/anticholinergic drug burden and renal clearance.`
+      : `High geriatric safety risk (${geriatricSafetyScore}/100). Multiple high-risk medications detected; clinical pharmacist review advised.`
+  };
+}
+
+
 
 
 
