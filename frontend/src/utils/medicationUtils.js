@@ -1731,6 +1731,73 @@ export function calculatePatientGeriatricMedicationSafetyAudit({
   };
 }
 
+export function calculatePatientComprehensiveLabAlertAndRiskScore({
+  potassiumMeqL = 4.2,
+  creatinineMgDl = 1.0,
+  altUL = 25,
+  wbcCount = 7.0,
+  plateletCount = 250
+} = {}) {
+  const params = [potassiumMeqL, creatinineMgDl, altUL, wbcCount, plateletCount];
+  if (params.some(p => typeof p !== 'number' || isNaN(p) || p < 0)) {
+    return { valid: false, error: 'All lab values must be valid non-negative numbers' };
+  }
+
+  const criticalAlerts = [];
+  let alertPoints = 0;
+
+  if (potassiumMeqL < 3.5) {
+    criticalAlerts.push('Hypokalemia (Low Potassium)');
+    alertPoints += 25;
+  } else if (potassiumMeqL > 5.0) {
+    criticalAlerts.push('Hyperkalemia (High Potassium)');
+    alertPoints += 30;
+  }
+
+  if (creatinineMgDl > 1.5) {
+    criticalAlerts.push('Elevated Serum Creatinine (Renal Impairment)');
+    alertPoints += 25;
+  }
+
+  if (altUL > 56) {
+    criticalAlerts.push('Elevated ALT (Hepatic Enzyme Spike)');
+    alertPoints += 20;
+  }
+
+  if (wbcCount < 4.0) {
+    criticalAlerts.push('Leukopenia (Low WBC)');
+    alertPoints += 20;
+  } else if (wbcCount > 11.0) {
+    criticalAlerts.push('Leukocytosis (Elevated WBC / Infection Risk)');
+    alertPoints += 15;
+  }
+
+  if (plateletCount < 150) {
+    criticalAlerts.push('Thrombocytopenia (Low Platelets)');
+    alertPoints += 20;
+  }
+
+  const alertScore = Math.min(100, alertPoints);
+
+  let riskTier = 'NORMAL_LAB_PROFILE';
+  if (alertScore >= 50) riskTier = 'HIGH_LAB_ALERT';
+  else if (alertScore >= 20) riskTier = 'MODERATE_LAB_ALERT';
+
+  return {
+    valid: true,
+    alertScore,
+    riskTier,
+    criticalAlertCount: criticalAlerts.length,
+    criticalAlerts,
+    recommendation: riskTier === 'NORMAL_LAB_PROFILE'
+      ? `All key lab parameters are within acceptable reference ranges (Alert Score: ${alertScore}/100).`
+      : riskTier === 'MODERATE_LAB_ALERT'
+      ? `Moderate lab abnormalities detected (${criticalAlerts.join(', ')}). Monitor routine lab panel.`
+      : `CRITICAL LAB ALERT (${criticalAlerts.join(', ')}). Immediate physician notification recommended.`
+  };
+}
+
+
 
 
 
