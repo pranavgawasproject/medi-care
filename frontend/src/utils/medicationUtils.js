@@ -1859,6 +1859,64 @@ export function calculatePatientChronicDiseaseMultimorbidityScore({
   };
 }
 
+export function calculatePatientCardiovascularRiskScore({
+  systolicBp = 135,
+  diastolicBp = 85,
+  totalCholesterolMgDl = 210,
+  hdlCholesterolMgDl = 45,
+  isSmoker = false,
+  isDiabetic = false,
+  patientAgeYears = 58
+} = {}) {
+  if (typeof systolicBp !== 'number' || systolicBp < 70 || systolicBp > 250) {
+    return { valid: false, error: 'Systolic blood pressure must be a realistic number between 70 and 250 mmHg' };
+  }
+  if (typeof patientAgeYears !== 'number' || patientAgeYears < 18 || patientAgeYears > 120) {
+    return { valid: false, error: 'Patient age must be an adult age between 18 and 120 years' };
+  }
+
+  let riskPoints = 0;
+  if (systolicBp >= 160) riskPoints += 30;
+  else if (systolicBp >= 140) riskPoints += 20;
+  else if (systolicBp >= 130) riskPoints += 10;
+
+  if (totalCholesterolMgDl >= 240) riskPoints += 25;
+  else if (totalCholesterolMgDl >= 200) riskPoints += 15;
+
+  if (hdlCholesterolMgDl < 40) riskPoints += 15;
+
+  if (isSmoker) riskPoints += 20;
+  if (isDiabetic) riskPoints += 20;
+
+  if (patientAgeYears >= 65) riskPoints += 25;
+  else if (patientAgeYears >= 55) riskPoints += 15;
+
+  const cvdRiskScore = Math.min(100, Math.max(0, riskPoints));
+
+  let cvdRiskTier = 'LOW_CARDIOVASCULAR_RISK';
+  if (cvdRiskScore >= 60) cvdRiskTier = 'HIGH_CARDIOVASCULAR_RISK';
+  else if (cvdRiskScore >= 30) cvdRiskTier = 'MODERATE_CARDIOVASCULAR_RISK';
+
+  return {
+    valid: true,
+    patientAgeYears,
+    systolicBp,
+    diastolicBp,
+    totalCholesterolMgDl,
+    hdlCholesterolMgDl,
+    isSmoker: Boolean(isSmoker),
+    isDiabetic: Boolean(isDiabetic),
+    cvdRiskScore,
+    cvdRiskTier,
+    recommendation: cvdRiskTier === 'HIGH_CARDIOVASCULAR_RISK'
+      ? `HIGH CARDIOVASCULAR RISK (${cvdRiskScore}/100 score). Intensive BP and lipid management, lifestyle intervention, and cardiology consultation recommended.`
+      : cvdRiskTier === 'MODERATE_CARDIOVASCULAR_RISK'
+      ? `MODERATE CARDIOVASCULAR RISK (${cvdRiskScore}/100 score). Monitor blood pressure and lipid profile semi-annually.`
+      : `LOW CARDIOVASCULAR RISK (${cvdRiskScore}/100 score). Continue healthy lifestyle and routine health checkups.`
+  };
+}
+
+
 
 
 
