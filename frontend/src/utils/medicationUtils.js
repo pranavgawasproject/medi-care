@@ -1797,6 +1797,69 @@ export function calculatePatientComprehensiveLabAlertAndRiskScore({
   };
 }
 
+export function calculatePatientChronicDiseaseMultimorbidityScore({
+  chronicDiseasesList = [],
+  patientAgeYears = 65,
+  activeMedicationsCount = 4,
+  recentHospitalizationsCount = 0
+} = {}) {
+  if (!Array.isArray(chronicDiseasesList)) {
+    return { valid: false, error: 'Chronic diseases list must be an array' };
+  }
+  if (typeof patientAgeYears !== 'number' || patientAgeYears < 0 || isNaN(patientAgeYears)) {
+    return { valid: false, error: 'Patient age must be a valid non-negative number' };
+  }
+
+  const highWeightDiseases = ['heart disease', 'heart failure', 'copd', 'kidney disease', 'ckd', 'stroke', 'cancer'];
+  let diseasePoints = 0;
+  const categorizedDiseases = [];
+
+  for (const d of chronicDiseasesList) {
+    if (!d) continue;
+    const name = (typeof d === 'string' ? d : d.name || '').trim();
+    if (!name) continue;
+    categorizedDiseases.push(name);
+    const lower = name.toLowerCase();
+    const isHighWeight = highWeightDiseases.some(kw => lower.includes(kw));
+    diseasePoints += isHighWeight ? 15 : 10;
+  }
+
+  const ageBonus = patientAgeYears >= 75 ? 20 : (patientAgeYears >= 65 ? 10 : 0);
+  const medBonus = Math.min(20, (activeMedicationsCount || 0) * 3);
+  const hospBonus = Math.min(25, (recentHospitalizationsCount || 0) * 12.5);
+
+  const rawScore = diseasePoints + ageBonus + medBonus + hospBonus;
+  const multimorbidityRiskScore = Math.min(100, Math.round(rawScore));
+
+  let riskTier = 'LOW_COMPLEXITY';
+  let recommendedFollowupMonths = 6;
+
+  if (multimorbidityRiskScore >= 65) {
+    riskTier = 'HIGH_MULTIMORBIDITY_RISK';
+    recommendedFollowupMonths = 1;
+  } else if (multimorbidityRiskScore >= 35) {
+    riskTier = 'MODERATE_COMPLEXITY';
+    recommendedFollowupMonths = 3;
+  }
+
+  return {
+    valid: true,
+    patientAgeYears,
+    chronicDiseasesCount: categorizedDiseases.length,
+    activeMedicationsCount: activeMedicationsCount || 0,
+    recentHospitalizationsCount: recentHospitalizationsCount || 0,
+    multimorbidityRiskScore,
+    riskTier,
+    recommendedFollowupMonths,
+    recommendation: riskTier === 'HIGH_MULTIMORBIDITY_RISK'
+      ? `HIGH MULTIMORBIDITY RISK (${multimorbidityRiskScore}/100). Multidisciplinary care team coordination and monthly clinical review required.`
+      : riskTier === 'MODERATE_COMPLEXITY'
+      ? `MODERATE COMPLEXITY (${multimorbidityRiskScore}/100). Follow-up every ${recommendedFollowupMonths} months recommended.`
+      : `Low chronic disease complexity score (${multimorbidityRiskScore}/100). Standard semi-annual review.`
+  };
+}
+
+
 
 
 
