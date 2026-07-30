@@ -2023,6 +2023,53 @@ export function calculatePatientHypertensionAndCardiovascularRiskScore({
   };
 }
 
+export function calculatePatientEmergencySymptomTriagingScore({
+  symptomSeverityScale = 5,
+  chestPainPresent = false,
+  shortnessOfBreathPresent = false,
+  feverTemperatureF = 98.6,
+  patientAgeYears = 45
+} = {}) {
+  if (typeof symptomSeverityScale !== 'number' || symptomSeverityScale < 1 || symptomSeverityScale > 10) {
+    return { valid: false, error: 'Symptom severity scale must be a number between 1 and 10' };
+  }
+  if (typeof feverTemperatureF !== 'number' || feverTemperatureF < 90 || feverTemperatureF > 110) {
+    return { valid: false, error: 'Fever temperature must be between 90°F and 110°F' };
+  }
+  if (typeof patientAgeYears !== 'number' || patientAgeYears <= 0 || !Number.isInteger(patientAgeYears)) {
+    return { valid: false, error: 'Patient age must be a positive integer' };
+  }
+
+  let score = symptomSeverityScale * 7;
+  if (chestPainPresent) score += 25;
+  if (shortnessOfBreathPresent) score += 20;
+  if (feverTemperatureF >= 102) score += 15;
+  if (patientAgeYears >= 65) score += 10;
+
+  const totalTriageScore = Math.min(100, Math.max(0, score));
+
+  let triagePriorityTier = 'ROUTINE_CARE';
+  if (totalTriageScore >= 75 || chestPainPresent) triagePriorityTier = 'EMERGENCY_IMMEDIATE_CARE';
+  else if (totalTriageScore >= 50 || shortnessOfBreathPresent) triagePriorityTier = 'URGENT_SAME_DAY_CARE';
+
+  return {
+    valid: true,
+    symptomSeverityScale,
+    chestPainPresent: Boolean(chestPainPresent),
+    shortnessOfBreathPresent: Boolean(shortnessOfBreathPresent),
+    feverTemperatureF,
+    patientAgeYears,
+    totalTriageScore,
+    triagePriorityTier,
+    recommendation: triagePriorityTier === 'EMERGENCY_IMMEDIATE_CARE'
+      ? `CRITICAL TRIAGE SCORE (${totalTriageScore}/100). Immediate emergency department referral required.`
+      : triagePriorityTier === 'URGENT_SAME_DAY_CARE'
+      ? `URGENT TRIAGE SCORE (${totalTriageScore}/100). Schedule same-day urgent telehealth consultation.`
+      : `Routine triage score (${totalTriageScore}/100). Standard appointment scheduling recommended.`
+  };
+}
+
+
 
 
 
