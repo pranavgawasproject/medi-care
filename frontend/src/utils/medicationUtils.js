@@ -1968,6 +1968,62 @@ export function calculatePatientGlycemicControlAndDiabetesRiskScore({
   };
 }
 
+export function calculatePatientHypertensionAndCardiovascularRiskScore({
+  systolicBp = 138,
+  diastolicBp = 88,
+  patientAgeYears = 62,
+  isAntihypertensiveMedicated = true
+} = {}) {
+  if (typeof systolicBp !== 'number' || systolicBp < 70 || systolicBp > 260) {
+    return { valid: false, error: 'Systolic blood pressure must be a realistic number between 70 and 260 mmHg' };
+  }
+  if (typeof diastolicBp !== 'number' || diastolicBp < 40 || diastolicBp > 150) {
+    return { valid: false, error: 'Diastolic blood pressure must be a realistic number between 40 and 150 mmHg' };
+  }
+
+  let bpStage = 'NORMAL_BLOOD_PRESSURE';
+  let score = 10;
+
+  if (systolicBp >= 180 || diastolicBp >= 120) {
+    bpStage = 'HYPERTENSIVE_CRISIS';
+    score = 95;
+  } else if (systolicBp >= 140 || diastolicBp >= 90) {
+    bpStage = 'STAGE_2_HYPERTENSION';
+    score = 75;
+  } else if (systolicBp >= 130 || diastolicBp >= 80) {
+    bpStage = 'STAGE_1_HYPERTENSION';
+    score = 50;
+  } else if (systolicBp >= 120 && diastolicBp < 80) {
+    bpStage = 'ELEVATED';
+    score = 30;
+  }
+
+  if (isAntihypertensiveMedicated && bpStage !== 'NORMAL_BLOOD_PRESSURE') {
+    score = Math.min(100, score + 10);
+  }
+
+  const ageBonus = patientAgeYears >= 65 ? 10 : 0;
+  const hypertensionRiskScore = Math.min(100, Math.max(0, score + ageBonus));
+
+  return {
+    valid: true,
+    systolicBp,
+    diastolicBp,
+    patientAgeYears,
+    isAntihypertensiveMedicated: Boolean(isAntihypertensiveMedicated),
+    bpStage,
+    hypertensionRiskScore,
+    recommendation: bpStage === 'HYPERTENSIVE_CRISIS'
+      ? `HYPERTENSIVE CRISIS (${systolicBp}/${diastolicBp} mmHg). Immediate emergency medical evaluation required.`
+      : bpStage === 'STAGE_2_HYPERTENSION'
+      ? `STAGE 2 HYPERTENSION (${systolicBp}/${diastolicBp} mmHg). Antihypertensive therapy adjustment and prompt clinical follow-up required.`
+      : bpStage === 'STAGE_1_HYPERTENSION'
+      ? `STAGE 1 HYPERTENSION (${systolicBp}/${diastolicBp} mmHg). Recommend lifestyle modifications and blood pressure monitoring.`
+      : `Blood pressure within target range (${systolicBp}/${diastolicBp} mmHg). Continue routine wellness monitoring.`
+  };
+}
+
+
 
 
 
