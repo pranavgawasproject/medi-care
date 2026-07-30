@@ -1,6 +1,7 @@
 import assert from 'node:assert';
 import test from 'node:test';
-import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore, calculateMedicationInteractionRiskScore, calculatePatientVitalSignStabilityIndex, calculatePatientAppointmentTriagePriority, calculatePatientPrescriptionRefillRiskIndex, calculatePatientPolypharmacyRiskIndex, calculatePatientReadmissionRiskScore, calculatePatientMedicationAdherenceTier, calculatePatientEmergencyRiskScore, calculatePatientAppointmentNoShowProbability, calculatePatientChronicConditionComplexityIndex, calculatePatientMedicationRefillAdherenceScore, calculatePatientMedicationStorageTemperatureSafety, calculatePatientVitalSignAnomalyAlertScore, calculatePatientLabTestResultSeverityScore, calculateTelehealthSlotOptimizationIndex, calculateTelehealthConsultationTriagingIndex, calculatePatientHealthScoreAndRiskTier, calculatePatientMedicationSideEffectRiskScore, calculatePatientPediatricDosageSafety, calculatePatientRenalDoseAdjustment, calculatePatientAnticholinergicCognitiveRiskScore, calculatePatientPolypharmacyInteractionIndex, calculatePatientGeriatricMedicationSafetyAudit, calculatePatientComprehensiveLabAlertAndRiskScore, calculatePatientChronicDiseaseMultimorbidityScore, calculatePatientCardiovascularRiskScore } from '../src/utils/medicationUtils.js';
+import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore, calculateMedicationInteractionRiskScore, calculatePatientVitalSignStabilityIndex, calculatePatientAppointmentTriagePriority, calculatePatientPrescriptionRefillRiskIndex, calculatePatientPolypharmacyRiskIndex, calculatePatientReadmissionRiskScore, calculatePatientMedicationAdherenceTier, calculatePatientEmergencyRiskScore, calculatePatientAppointmentNoShowProbability, calculatePatientChronicConditionComplexityIndex, calculatePatientMedicationRefillAdherenceScore, calculatePatientMedicationStorageTemperatureSafety, calculatePatientVitalSignAnomalyAlertScore, calculatePatientLabTestResultSeverityScore, calculateTelehealthSlotOptimizationIndex, calculateTelehealthConsultationTriagingIndex, calculatePatientHealthScoreAndRiskTier, calculatePatientMedicationSideEffectRiskScore, calculatePatientPediatricDosageSafety, calculatePatientRenalDoseAdjustment, calculatePatientAnticholinergicCognitiveRiskScore, calculatePatientPolypharmacyInteractionIndex, calculatePatientGeriatricMedicationSafetyAudit, calculatePatientComprehensiveLabAlertAndRiskScore, calculatePatientChronicDiseaseMultimorbidityScore, calculatePatientCardiovascularRiskScore, calculatePatientGlycemicControlAndDiabetesRiskScore } from '../src/utils/medicationUtils.js';
+
 
 
 
@@ -895,6 +896,34 @@ test('calculatePatientCardiovascularRiskScore - calculates risk score and clinic
   const invalid = calculatePatientCardiovascularRiskScore({ systolicBp: 50 });
   assert.strictEqual(invalid.valid, false);
 });
+
+test('calculatePatientGlycemicControlAndDiabetesRiskScore', () => {
+  const highRisk = calculatePatientGlycemicControlAndDiabetesRiskScore({
+    hba1cPercent: 9.5,
+    fastingGlucoseMgDl: 210,
+    hypoglycemicEpisodesPastMonth: 2,
+    hasAnnualRetinalExam: false,
+    hasAnnualKidneyScreening: false
+  });
+  assert.strictEqual(highRisk.valid, true);
+  assert.strictEqual(highRisk.glycemicControlTier, 'POOR_GLYCEMIC_CONTROL');
+  assert.ok(highRisk.glycemicRiskScore >= 60);
+
+  const lowRisk = calculatePatientGlycemicControlAndDiabetesRiskScore({
+    hba1cPercent: 6.2,
+    fastingGlucoseMgDl: 95,
+    hypoglycemicEpisodesPastMonth: 0,
+    hasAnnualRetinalExam: true,
+    hasAnnualKidneyScreening: true
+  });
+  assert.strictEqual(lowRisk.valid, true);
+  assert.strictEqual(lowRisk.glycemicControlTier, 'OPTIMAL_GLYCEMIC_CONTROL');
+
+  const invalid = calculatePatientGlycemicControlAndDiabetesRiskScore({ hba1cPercent: -1 });
+  assert.strictEqual(invalid.valid, false);
+  assert.strictEqual(invalid.error, 'HbA1c percentage must be a positive number');
+});
+
 
 
 

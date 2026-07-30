@@ -1916,6 +1916,59 @@ export function calculatePatientCardiovascularRiskScore({
   };
 }
 
+export function calculatePatientGlycemicControlAndDiabetesRiskScore({
+  hba1cPercent = 7.2,
+  fastingGlucoseMgDl = 135,
+  hypoglycemicEpisodesPastMonth = 0,
+  hasAnnualRetinalExam = true,
+  hasAnnualKidneyScreening = true
+} = {}) {
+  if (typeof hba1cPercent !== 'number' || hba1cPercent <= 0 || isNaN(hba1cPercent)) {
+    return { valid: false, error: 'HbA1c percentage must be a positive number' };
+  }
+  if (typeof fastingGlucoseMgDl !== 'number' || fastingGlucoseMgDl <= 0 || isNaN(fastingGlucoseMgDl)) {
+    return { valid: false, error: 'Fasting blood glucose must be a positive number' };
+  }
+
+  let riskPoints = 0;
+  if (hba1cPercent >= 9.0) riskPoints += 45;
+  else if (hba1cPercent >= 8.0) riskPoints += 30;
+  else if (hba1cPercent >= 7.0) riskPoints += 15;
+
+  if (fastingGlucoseMgDl >= 200) riskPoints += 25;
+  else if (fastingGlucoseMgDl >= 140) riskPoints += 15;
+
+  if (hypoglycemicEpisodesPastMonth > 0) {
+    riskPoints += Math.min(20, hypoglycemicEpisodesPastMonth * 10);
+  }
+
+  if (!hasAnnualRetinalExam) riskPoints += 10;
+  if (!hasAnnualKidneyScreening) riskPoints += 10;
+
+  const glycemicRiskScore = Math.min(100, Math.max(0, riskPoints));
+
+  let glycemicControlTier = 'OPTIMAL_GLYCEMIC_CONTROL';
+  if (glycemicRiskScore >= 60 || hba1cPercent >= 9.0) glycemicControlTier = 'POOR_GLYCEMIC_CONTROL';
+  else if (glycemicRiskScore >= 30 || hba1cPercent >= 7.5) glycemicControlTier = 'SUBOPTIMAL_GLYCEMIC_CONTROL';
+
+  return {
+    valid: true,
+    hba1cPercent,
+    fastingGlucoseMgDl,
+    hypoglycemicEpisodesPastMonth: Math.max(0, hypoglycemicEpisodesPastMonth || 0),
+    hasAnnualRetinalExam: Boolean(hasAnnualRetinalExam),
+    hasAnnualKidneyScreening: Boolean(hasAnnualKidneyScreening),
+    glycemicRiskScore,
+    glycemicControlTier,
+    recommendation: glycemicControlTier === 'POOR_GLYCEMIC_CONTROL'
+      ? `POOR GLYCEMIC CONTROL (${glycemicRiskScore}/100 score, HbA1c ${hba1cPercent}%). Urgent endocrinology review, medication titration, and diabetes education required.`
+      : glycemicControlTier === 'SUBOPTIMAL_GLYCEMIC_CONTROL'
+      ? `SUBOPTIMAL GLYCEMIC CONTROL (${glycemicRiskScore}/100 score, HbA1c ${hba1cPercent}%). Adjust anti-diabetic therapy and reinforce dietary compliance.`
+      : `OPTIMAL GLYCEMIC CONTROL (${glycemicRiskScore}/100 score, HbA1c ${hba1cPercent}%). Continue routine quarterly HbA1c monitoring.`
+  };
+}
+
+
 
 
 
