@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 import test from 'node:test';
-import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore, calculateMedicationInteractionRiskScore, calculatePatientVitalSignStabilityIndex, calculatePatientAppointmentTriagePriority, calculatePatientPrescriptionRefillRiskIndex, calculatePatientPolypharmacyRiskIndex, calculatePatientReadmissionRiskScore, calculatePatientMedicationAdherenceTier, calculatePatientEmergencyRiskScore, calculatePatientAppointmentNoShowProbability, calculatePatientChronicConditionComplexityIndex, calculatePatientMedicationRefillAdherenceScore, calculatePatientMedicationStorageTemperatureSafety, calculatePatientVitalSignAnomalyAlertScore, calculatePatientLabTestResultSeverityScore, calculateTelehealthSlotOptimizationIndex, calculateTelehealthConsultationTriagingIndex, calculatePatientHealthScoreAndRiskTier, calculatePatientMedicationSideEffectRiskScore, calculatePatientPediatricDosageSafety, calculatePatientRenalDoseAdjustment, calculatePatientAnticholinergicCognitiveRiskScore, calculatePatientPolypharmacyInteractionIndex, calculatePatientGeriatricMedicationSafetyAudit, calculatePatientComprehensiveLabAlertAndRiskScore, calculatePatientChronicDiseaseMultimorbidityScore, calculatePatientCardiovascularRiskScore, calculatePatientGlycemicControlAndDiabetesRiskScore, calculatePatientHypertensionAndCardiovascularRiskScore, calculatePatientEmergencySymptomTriagingScore } from '../src/utils/medicationUtils.js';
+import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore, calculateMedicationInteractionRiskScore, calculatePatientVitalSignStabilityIndex, calculatePatientAppointmentTriagePriority, calculatePatientPrescriptionRefillRiskIndex, calculatePatientPolypharmacyRiskIndex, calculatePatientReadmissionRiskScore, calculatePatientMedicationAdherenceTier, calculatePatientEmergencyRiskScore, calculatePatientAppointmentNoShowProbability, calculatePatientChronicConditionComplexityIndex, calculatePatientMedicationRefillAdherenceScore, calculatePatientMedicationStorageTemperatureSafety, calculatePatientVitalSignAnomalyAlertScore, calculatePatientLabTestResultSeverityScore, calculateTelehealthSlotOptimizationIndex, calculateTelehealthConsultationTriagingIndex, calculatePatientHealthScoreAndRiskTier, calculatePatientMedicationSideEffectRiskScore, calculatePatientPediatricDosageSafety, calculatePatientRenalDoseAdjustment, calculatePatientAnticholinergicCognitiveRiskScore, calculatePatientPolypharmacyInteractionIndex, calculatePatientGeriatricMedicationSafetyAudit, calculatePatientComprehensiveLabAlertAndRiskScore, calculatePatientChronicDiseaseMultimorbidityScore, calculatePatientCardiovascularRiskScore, calculatePatientGlycemicControlAndDiabetesRiskScore, calculatePatientHypertensionAndCardiovascularRiskScore, calculatePatientEmergencySymptomTriagingScore, calculatePatientInpatientReadmissionRiskScore } from '../src/utils/medicationUtils.js';
 
 
 
@@ -968,6 +968,35 @@ test('calculatePatientEmergencySymptomTriagingScore', () => {
   assert.strictEqual(invalid.valid, false);
   assert.strictEqual(invalid.error, 'Symptom severity scale must be a number between 1 and 10');
 });
+
+test('calculatePatientInpatientReadmissionRiskScore', () => {
+  const highRisk = calculatePatientInpatientReadmissionRiskScore({
+    lengthOfStayDays: 8,
+    isAcuteEmergencyAdmission: true,
+    charlsonComorbidityIndex: 3,
+    emergencyVisitsPast6Months: 2
+  });
+  assert.strictEqual(highRisk.valid, true);
+  assert.strictEqual(highRisk.readmissionRiskTier, 'HIGH_READMISSION_RISK');
+  assert.strictEqual(highRisk.laceIndexScore, 13);
+  assert.strictEqual(highRisk.estimated30DayReadmissionRatePct, 25);
+  assert.ok(highRisk.recommendation.includes('HIGH 30-DAY READMISSION RISK'));
+
+  const lowRisk = calculatePatientInpatientReadmissionRiskScore({
+    lengthOfStayDays: 1,
+    isAcuteEmergencyAdmission: false,
+    charlsonComorbidityIndex: 0,
+    emergencyVisitsPast6Months: 0
+  });
+  assert.strictEqual(lowRisk.valid, true);
+  assert.strictEqual(lowRisk.readmissionRiskTier, 'LOW_DISCHARGE_RISK');
+  assert.strictEqual(lowRisk.laceIndexScore, 1);
+
+  const invalid = calculatePatientInpatientReadmissionRiskScore({ lengthOfStayDays: 0 });
+  assert.strictEqual(invalid.valid, false);
+  assert.strictEqual(invalid.error, 'Length of stay must be a positive integer');
+});
+
 
 
 

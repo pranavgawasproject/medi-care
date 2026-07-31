@@ -2069,6 +2069,66 @@ export function calculatePatientEmergencySymptomTriagingScore({
   };
 }
 
+export function calculatePatientInpatientReadmissionRiskScore({
+  lengthOfStayDays = 3,
+  isAcuteEmergencyAdmission = true,
+  charlsonComorbidityIndex = 2,
+  emergencyVisitsPast6Months = 1
+} = {}) {
+  if (typeof lengthOfStayDays !== 'number' || lengthOfStayDays <= 0 || !Number.isInteger(lengthOfStayDays)) {
+    return { valid: false, error: 'Length of stay must be a positive integer' };
+  }
+  if (typeof charlsonComorbidityIndex !== 'number' || charlsonComorbidityIndex < 0 || !Number.isInteger(charlsonComorbidityIndex)) {
+    return { valid: false, error: 'Charlson comorbidity index must be a non-negative integer' };
+  }
+  if (typeof emergencyVisitsPast6Months !== 'number' || emergencyVisitsPast6Months < 0 || !Number.isInteger(emergencyVisitsPast6Months)) {
+    return { valid: false, error: 'Emergency visits past 6 months must be a non-negative integer' };
+  }
+
+  // LACE Index calculation
+  let losPoints = 0;
+  if (lengthOfStayDays >= 14) losPoints = 7;
+  else if (lengthOfStayDays >= 7) losPoints = 5;
+  else if (lengthOfStayDays >= 4) losPoints = 4;
+  else if (lengthOfStayDays >= 3) losPoints = 3;
+  else if (lengthOfStayDays >= 2) losPoints = 2;
+  else losPoints = 1;
+
+  const acuityPoints = isAcuteEmergencyAdmission ? 3 : 0;
+  const comorbidityPoints = Math.min(6, charlsonComorbidityIndex);
+  const edPoints = Math.min(4, emergencyVisitsPast6Months);
+
+  const laceIndexScore = losPoints + acuityPoints + comorbidityPoints + edPoints;
+
+  let readmissionRiskTier = 'LOW_DISCHARGE_RISK';
+  let estimated30DayReadmissionRatePct = 5.0;
+
+  if (laceIndexScore >= 10) {
+    readmissionRiskTier = 'HIGH_READMISSION_RISK';
+    estimated30DayReadmissionRatePct = 25.0;
+  } else if (laceIndexScore >= 6) {
+    readmissionRiskTier = 'MODERATE_DISCHARGE_RISK';
+    estimated30DayReadmissionRatePct = 12.5;
+  }
+
+  return {
+    valid: true,
+    lengthOfStayDays,
+    isAcuteEmergencyAdmission: Boolean(isAcuteEmergencyAdmission),
+    charlsonComorbidityIndex,
+    emergencyVisitsPast6Months,
+    laceIndexScore,
+    readmissionRiskTier,
+    estimated30DayReadmissionRatePct,
+    recommendation: readmissionRiskTier === 'HIGH_READMISSION_RISK'
+      ? `HIGH 30-DAY READMISSION RISK (LACE Score: ${laceIndexScore}/28, ~${estimated30DayReadmissionRatePct}% risk). Post-discharge nurse follow-up call within 48h and 7-day clinic visit required.`
+      : readmissionRiskTier === 'MODERATE_DISCHARGE_RISK'
+      ? `MODERATE READMISSION RISK (LACE Score: ${laceIndexScore}/28, ~${estimated30DayReadmissionRatePct}% risk). Schedule 14-day outpatient follow-up.`
+      : `LOW READMISSION RISK (LACE Score: ${laceIndexScore}/28). Standard routine post-discharge care.`
+  };
+}
+
+
 
 
 
