@@ -2166,6 +2166,58 @@ export function calculatePatientPerioperativeMedicationHoldAudit({
   };
 }
 
+export function calculatePatientChronicCareMonitoringIndex({
+  systolicBp = 135,
+  diastolicBp = 85,
+  fastingGlucoseMgDl = 110,
+  adherencePercentage = 90,
+  daysSinceLastCheckup = 45
+} = {}) {
+  if (typeof systolicBp !== 'number' || systolicBp <= 0 || isNaN(systolicBp)) {
+    return { valid: false, error: 'Systolic blood pressure must be a positive number' };
+  }
+  if (typeof adherencePercentage !== 'number' || adherencePercentage < 0 || adherencePercentage > 100) {
+    return { valid: false, error: 'Adherence percentage must be between 0 and 100' };
+  }
+
+  let healthScore = 100;
+  if (systolicBp >= 140 || diastolicBp >= 90) healthScore -= 25;
+  else if (systolicBp >= 130 || diastolicBp >= 80) healthScore -= 10;
+
+  if (fastingGlucoseMgDl >= 126) healthScore -= 25;
+  else if (fastingGlucoseMgDl >= 100) healthScore -= 10;
+
+  if (adherencePercentage < 80) healthScore -= 20;
+
+  if (daysSinceLastCheckup > 90) healthScore -= 15;
+
+  healthScore = Math.max(0, Math.min(100, healthScore));
+
+  let careTier = 'OPTIMAL_CHRONIC_CONTROL';
+  if (healthScore < 60) {
+    careTier = 'ELEVATED_CHRONIC_RISK';
+  } else if (healthScore < 80) {
+    careTier = 'MODERATE_CHRONIC_CONTROL';
+  }
+
+  return {
+    valid: true,
+    systolicBp,
+    diastolicBp,
+    fastingGlucoseMgDl,
+    adherencePercentage,
+    daysSinceLastCheckup,
+    healthScore,
+    careTier,
+    recommendation: careTier === 'ELEVATED_CHRONIC_RISK'
+      ? `Elevated chronic care risk (Health Score: ${healthScore}/100). Recommend urgent physician consultation and medication review.`
+      : careTier === 'MODERATE_CHRONIC_CONTROL'
+      ? `Moderate chronic control (Health Score: ${healthScore}/100). Encourage adherence and routine follow-up.`
+      : `Optimal chronic care management (Health Score: ${healthScore}/100). Maintain current regimen.`
+  };
+}
+
+
 
 
 
