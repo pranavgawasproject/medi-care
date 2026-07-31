@@ -2128,6 +2128,45 @@ export function calculatePatientInpatientReadmissionRiskScore({
   };
 }
 
+export function calculatePatientPerioperativeMedicationHoldAudit({
+  medicationName = 'Aspirin',
+  medicationCategory = 'anticoagulant',
+  plannedProcedureHoursAway = 48,
+  hasHighBleedingRiskProcedure = true
+} = {}) {
+  const medCat = (medicationCategory || 'other').toLowerCase().trim();
+  let recommendedHoldDays = 0;
+  let actionRequired = 'CONTINUE_MEDICATION';
+
+  if (['anticoagulant', 'antiplatelet'].includes(medCat)) {
+    recommendedHoldDays = hasHighBleedingRiskProcedure ? 5 : 2;
+    actionRequired = 'HOLD_MEDICATION_BEFORE_PROCEDURE';
+  } else if (['nsaid', 'blood_thinner'].includes(medCat)) {
+    recommendedHoldDays = 3;
+    actionRequired = 'HOLD_MEDICATION_BEFORE_PROCEDURE';
+  } else if (['ace_inhibitor', 'arb'].includes(medCat)) {
+    recommendedHoldDays = 1;
+    actionRequired = 'HOLD_DAY_OF_SURGERY';
+  }
+
+  const plannedHoldDays = plannedProcedureHoursAway / 24;
+  const isHoldDurationCompliant = plannedHoldDays >= recommendedHoldDays;
+
+  return {
+    valid: true,
+    medicationName,
+    medicationCategory: medCat,
+    plannedProcedureHoursAway,
+    recommendedHoldDays,
+    isHoldDurationCompliant,
+    actionRequired,
+    recommendation: isHoldDurationCompliant || actionRequired === 'CONTINUE_MEDICATION'
+      ? `Perioperative safety verified for ${medicationName}. Hold duration (${plannedHoldDays.toFixed(1)} days) meets safety guidelines.`
+      : `SAFETY WARNING: ${medicationName} (${medCat}) requires a ${recommendedHoldDays}-day hold before surgery. Current hold window is only ${plannedHoldDays.toFixed(1)} days.`
+  };
+}
+
+
 
 
 
