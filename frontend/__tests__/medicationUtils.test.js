@@ -1,6 +1,7 @@
 import assert from 'node:assert';
 import test from 'node:test';
-import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore, calculateMedicationInteractionRiskScore, calculatePatientVitalSignStabilityIndex, calculatePatientAppointmentTriagePriority, calculatePatientPrescriptionRefillRiskIndex, calculatePatientPolypharmacyRiskIndex, calculatePatientReadmissionRiskScore, calculatePatientMedicationAdherenceTier, calculatePatientEmergencyRiskScore, calculatePatientAppointmentNoShowProbability, calculatePatientChronicConditionComplexityIndex, calculatePatientMedicationRefillAdherenceScore, calculatePatientMedicationStorageTemperatureSafety, calculatePatientVitalSignAnomalyAlertScore, calculatePatientLabTestResultSeverityScore, calculateTelehealthSlotOptimizationIndex, calculateTelehealthConsultationTriagingIndex, calculatePatientHealthScoreAndRiskTier, calculatePatientMedicationSideEffectRiskScore, calculatePatientPediatricDosageSafety, calculatePatientRenalDoseAdjustment, calculatePatientAnticholinergicCognitiveRiskScore, calculatePatientPolypharmacyInteractionIndex, calculatePatientGeriatricMedicationSafetyAudit, calculatePatientComprehensiveLabAlertAndRiskScore, calculatePatientChronicDiseaseMultimorbidityScore, calculatePatientCardiovascularRiskScore, calculatePatientGlycemicControlAndDiabetesRiskScore, calculatePatientHypertensionAndCardiovascularRiskScore, calculatePatientEmergencySymptomTriagingScore, calculatePatientInpatientReadmissionRiskScore, calculatePatientPerioperativeMedicationHoldAudit, calculatePatientChronicCareMonitoringIndex, calculatePatientTelehealthTriageScore } from '../src/utils/medicationUtils.js';
+import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore, calculateMedicationInteractionRiskScore, calculatePatientVitalSignStabilityIndex, calculatePatientAppointmentTriagePriority, calculatePatientPrescriptionRefillRiskIndex, calculatePatientPolypharmacyRiskIndex, calculatePatientReadmissionRiskScore, calculatePatientMedicationAdherenceTier, calculatePatientEmergencyRiskScore, calculatePatientAppointmentNoShowProbability, calculatePatientChronicConditionComplexityIndex, calculatePatientMedicationRefillAdherenceScore, calculatePatientMedicationStorageTemperatureSafety, calculatePatientVitalSignAnomalyAlertScore, calculatePatientLabTestResultSeverityScore, calculateTelehealthSlotOptimizationIndex, calculateTelehealthConsultationTriagingIndex, calculatePatientHealthScoreAndRiskTier, calculatePatientMedicationSideEffectRiskScore, calculatePatientPediatricDosageSafety, calculatePatientRenalDoseAdjustment, calculatePatientAnticholinergicCognitiveRiskScore, calculatePatientPolypharmacyInteractionIndex, calculatePatientGeriatricMedicationSafetyAudit, calculatePatientComprehensiveLabAlertAndRiskScore, calculatePatientChronicDiseaseMultimorbidityScore, calculatePatientCardiovascularRiskScore, calculatePatientGlycemicControlAndDiabetesRiskScore, calculatePatientHypertensionAndCardiovascularRiskScore, calculatePatientEmergencySymptomTriagingScore, calculatePatientInpatientReadmissionRiskScore, calculatePatientPerioperativeMedicationHoldAudit, calculatePatientChronicCareMonitoringIndex, calculatePatientTelehealthTriageScore, calculatePatientTelehealthVideoQualityScore } from '../src/utils/medicationUtils.js';
+
 
 
 
@@ -1067,6 +1068,35 @@ test('calculatePatientTelehealthTriageScore', () => {
   const invalid = calculatePatientTelehealthTriageScore({ symptomAcuityRating: 15 });
   assert.strictEqual(invalid.valid, false);
 });
+
+test('calculatePatientTelehealthVideoQualityScore', () => {
+  const hd = calculatePatientTelehealthVideoQualityScore({
+    downloadSpeedMbps: 30.0,
+    uploadSpeedMbps: 10.0,
+    networkLatencyMs: 25,
+    packetLossPct: 0,
+    cameraResolutionP: 1080
+  });
+  assert.strictEqual(hd.valid, true);
+  assert.strictEqual(hd.qualityTier, 'HD_VIDEO_READY');
+  assert.strictEqual(hd.isAudioOnlyFallbackAdvised, false);
+  assert.ok(hd.videoQualityScore >= 80);
+
+  const lowBandwidth = calculatePatientTelehealthVideoQualityScore({
+    downloadSpeedMbps: 1.5,
+    uploadSpeedMbps: 0.5,
+    networkLatencyMs: 200,
+    packetLossPct: 5.0
+  });
+  assert.strictEqual(lowBandwidth.valid, true);
+  assert.strictEqual(lowBandwidth.qualityTier, 'AUDIO_ONLY_FALLBACK_RECOMMENDED');
+  assert.strictEqual(lowBandwidth.isAudioOnlyFallbackAdvised, true);
+
+  const invalid = calculatePatientTelehealthVideoQualityScore({ downloadSpeedMbps: -5 });
+  assert.strictEqual(invalid.valid, false);
+  assert.strictEqual(invalid.error, 'Download speed must be a non-negative number');
+});
+
 
 
 

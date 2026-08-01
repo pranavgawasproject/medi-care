@@ -2268,6 +2268,56 @@ export function calculatePatientTelehealthTriageScore({
   };
 }
 
+export function calculatePatientTelehealthVideoQualityScore({
+  downloadSpeedMbps = 25.0,
+  uploadSpeedMbps = 5.0,
+  networkLatencyMs = 35,
+  packetLossPct = 0.5,
+  cameraResolutionP = 720
+} = {}) {
+  if (typeof downloadSpeedMbps !== 'number' || downloadSpeedMbps < 0 || isNaN(downloadSpeedMbps)) {
+    return { valid: false, error: 'Download speed must be a non-negative number' };
+  }
+  if (typeof uploadSpeedMbps !== 'number' || uploadSpeedMbps < 0 || isNaN(uploadSpeedMbps)) {
+    return { valid: false, error: 'Upload speed must be a non-negative number' };
+  }
+
+  let downloadScore = downloadSpeedMbps >= 25 ? 30 : downloadSpeedMbps >= 10 ? 20 : downloadSpeedMbps >= 3 ? 10 : 0;
+  let uploadScore = uploadSpeedMbps >= 5 ? 25 : uploadSpeedMbps >= 2 ? 15 : 5;
+  let latencyScore = networkLatencyMs <= 50 ? 25 : networkLatencyMs <= 150 ? 15 : 5;
+  let packetLossPenalty = Math.min(20, Math.round(packetLossPct * 5));
+
+  const totalScore = Math.max(0, Math.min(100, downloadScore + uploadScore + latencyScore - packetLossPenalty + (cameraResolutionP >= 720 ? 20 : 10)));
+
+  let qualityTier = 'HD_VIDEO_READY';
+  let isAudioOnlyFallbackAdvised = false;
+
+  if (totalScore < 45 || downloadSpeedMbps < 3 || uploadSpeedMbps < 1) {
+    qualityTier = 'AUDIO_ONLY_FALLBACK_RECOMMENDED';
+    isAudioOnlyFallbackAdvised = true;
+  } else if (totalScore < 75) {
+    qualityTier = 'STANDARD_DEF_VIDEO';
+  }
+
+  return {
+    valid: true,
+    downloadSpeedMbps,
+    uploadSpeedMbps,
+    networkLatencyMs,
+    packetLossPct,
+    cameraResolutionP,
+    videoQualityScore: totalScore,
+    qualityTier,
+    isAudioOnlyFallbackAdvised,
+    recommendation: isAudioOnlyFallbackAdvised
+      ? `Low bandwidth detected (Score: ${totalScore}/100). Switch to audio-only telehealth visit to avoid call drops.`
+      : qualityTier === 'STANDARD_DEF_VIDEO'
+      ? `Standard definition telehealth visit ready (Score: ${totalScore}/100). Close bandwidth-heavy background applications.`
+      : `HD video consultation ready (Score: ${totalScore}/100). Optimal clinical video quality.`
+  };
+}
+
+
 
 
 
