@@ -2217,6 +2217,58 @@ export function calculatePatientChronicCareMonitoringIndex({
   };
 }
 
+export function calculatePatientTelehealthTriageScore({
+  symptomAcuityRating = 5,
+  hasChestPain = false,
+  hasShortnessOfBreath = false,
+  patientAgeYears = 45,
+  comorbiditiesCount = 1
+} = {}) {
+  if (typeof symptomAcuityRating !== 'number' || symptomAcuityRating < 1 || symptomAcuityRating > 10 || isNaN(symptomAcuityRating)) {
+    return { valid: false, error: 'Symptom acuity rating must be a number between 1 and 10' };
+  }
+
+  let acuityPoints = symptomAcuityRating * 6;
+  if (hasChestPain) acuityPoints += 25;
+  if (hasShortnessOfBreath) acuityPoints += 20;
+
+  const age = typeof patientAgeYears === 'number' && patientAgeYears > 0 ? patientAgeYears : 45;
+  if (age >= 65) acuityPoints += 10;
+
+  const comorbidities = typeof comorbiditiesCount === 'number' && comorbiditiesCount >= 0 ? comorbiditiesCount : 0;
+  acuityPoints += Math.min(15, comorbidities * 5);
+
+  const triageScore = Math.min(100, Math.round(acuityPoints));
+
+  let triageTier = 'ROUTINE_TELEHEALTH';
+  let isEmergencyRedirectNeeded = false;
+
+  if (triageScore >= 75 || hasChestPain || hasShortnessOfBreath) {
+    triageTier = 'IMMEDIATE_ER_REDIRECT';
+    isEmergencyRedirectNeeded = true;
+  } else if (triageScore >= 50) {
+    triageTier = 'SAME_DAY_URGENT_TELEHEALTH';
+  }
+
+  return {
+    valid: true,
+    symptomAcuityRating,
+    hasChestPain: Boolean(hasChestPain),
+    hasShortnessOfBreath: Boolean(hasShortnessOfBreath),
+    patientAgeYears: age,
+    comorbiditiesCount: comorbidities,
+    triageScore,
+    triageTier,
+    isEmergencyRedirectNeeded,
+    recommendation: isEmergencyRedirectNeeded
+      ? `High acuity symptom presentation (${triageScore}/100). Recommend emergency room or 911 dispatch immediately.`
+      : triageTier === 'SAME_DAY_URGENT_TELEHEALTH'
+      ? `Urgent telehealth appointment recommended within 24 hours (${triageScore}/100).`
+      : `Routine virtual consultation suitable (${triageScore}/100).`
+  };
+}
+
+
 
 
 
