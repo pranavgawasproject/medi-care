@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 import test from 'node:test';
-import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore, calculateMedicationInteractionRiskScore, calculatePatientVitalSignStabilityIndex, calculatePatientAppointmentTriagePriority, calculatePatientPrescriptionRefillRiskIndex, calculatePatientPolypharmacyRiskIndex, calculatePatientReadmissionRiskScore, calculatePatientMedicationAdherenceTier, calculatePatientEmergencyRiskScore, calculatePatientAppointmentNoShowProbability, calculatePatientChronicConditionComplexityIndex, calculatePatientMedicationRefillAdherenceScore, calculatePatientMedicationStorageTemperatureSafety, calculatePatientVitalSignAnomalyAlertScore, calculatePatientLabTestResultSeverityScore, calculateTelehealthSlotOptimizationIndex, calculateTelehealthConsultationTriagingIndex, calculatePatientHealthScoreAndRiskTier, calculatePatientMedicationSideEffectRiskScore, calculatePatientPediatricDosageSafety, calculatePatientRenalDoseAdjustment, calculatePatientAnticholinergicCognitiveRiskScore, calculatePatientPolypharmacyInteractionIndex, calculatePatientGeriatricMedicationSafetyAudit, calculatePatientComprehensiveLabAlertAndRiskScore, calculatePatientChronicDiseaseMultimorbidityScore, calculatePatientCardiovascularRiskScore, calculatePatientGlycemicControlAndDiabetesRiskScore, calculatePatientHypertensionAndCardiovascularRiskScore, calculatePatientEmergencySymptomTriagingScore, calculatePatientInpatientReadmissionRiskScore, calculatePatientPerioperativeMedicationHoldAudit, calculatePatientChronicCareMonitoringIndex, calculatePatientTelehealthTriageScore, calculatePatientTelehealthVideoQualityScore, calculatePatientPrescriptionRefillAlertStatus } from '../src/utils/medicationUtils.js';
+import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore, calculateMedicationInteractionRiskScore, calculatePatientVitalSignStabilityIndex, calculatePatientAppointmentTriagePriority, calculatePatientPrescriptionRefillRiskIndex, calculatePatientPolypharmacyRiskIndex, calculatePatientReadmissionRiskScore, calculatePatientMedicationAdherenceTier, calculatePatientEmergencyRiskScore, calculatePatientAppointmentNoShowProbability, calculatePatientChronicConditionComplexityIndex, calculatePatientMedicationRefillAdherenceScore, calculatePatientMedicationStorageTemperatureSafety, calculatePatientVitalSignAnomalyAlertScore, calculatePatientLabTestResultSeverityScore, calculateTelehealthSlotOptimizationIndex, calculateTelehealthConsultationTriagingIndex, calculatePatientHealthScoreAndRiskTier, calculatePatientMedicationSideEffectRiskScore, calculatePatientPediatricDosageSafety, calculatePatientRenalDoseAdjustment, calculatePatientAnticholinergicCognitiveRiskScore, calculatePatientPolypharmacyInteractionIndex, calculatePatientGeriatricMedicationSafetyAudit, calculatePatientComprehensiveLabAlertAndRiskScore, calculatePatientChronicDiseaseMultimorbidityScore, calculatePatientCardiovascularRiskScore, calculatePatientGlycemicControlAndDiabetesRiskScore, calculatePatientHypertensionAndCardiovascularRiskScore, calculatePatientEmergencySymptomTriagingScore, calculatePatientInpatientReadmissionRiskScore, calculatePatientPerioperativeMedicationHoldAudit, calculatePatientChronicCareMonitoringIndex, calculatePatientTelehealthTriageScore, calculatePatientTelehealthVideoQualityScore, calculatePatientPrescriptionRefillAlertStatus, calculatePatientChronicDiseaseAdherenceScore } from '../src/utils/medicationUtils.js';
 
 
 
@@ -1120,6 +1120,31 @@ test('calculatePatientPrescriptionRefillAlertStatus', () => {
   const invalid = calculatePatientPrescriptionRefillAlertStatus({ currentDosesRemaining: -1 });
   assert.strictEqual(invalid.valid, false);
   assert.strictEqual(invalid.error, 'Current doses remaining must be a non-negative number');
+});
+
+test('calculatePatientChronicDiseaseAdherenceScore', () => {
+  const normal = calculatePatientChronicDiseaseAdherenceScore({
+    takenDosesCount: 28,
+    prescribedDosesCount: 30,
+    missedDoseStreakDays: 0
+  });
+  assert.strictEqual(normal.valid, true);
+  assert.strictEqual(normal.adherencePct, 93.3);
+  assert.strictEqual(normal.adherenceTier, 'OPTIMAL_ADHERENCE');
+  assert.ok(normal.recommendation.includes('Optimal medication adherence achieved'));
+
+  const highRisk = calculatePatientChronicDiseaseAdherenceScore({
+    takenDosesCount: 15,
+    prescribedDosesCount: 30,
+    missedDoseStreakDays: 4
+  });
+  assert.strictEqual(highRisk.valid, true);
+  assert.strictEqual(highRisk.adherenceTier, 'NON_ADHERENT_HIGH_RISK');
+  assert.ok(highRisk.recommendation.includes('High non-adherence risk'));
+
+  const invalid = calculatePatientChronicDiseaseAdherenceScore({ takenDosesCount: -1 });
+  assert.strictEqual(invalid.valid, false);
+  assert.strictEqual(invalid.error, 'Taken doses count must be a non-negative number');
 });
 
 

@@ -2358,6 +2358,52 @@ export function calculatePatientPrescriptionRefillAlertStatus({
   };
 }
 
+export function calculatePatientChronicDiseaseAdherenceScore({
+  takenDosesCount = 28,
+  prescribedDosesCount = 30,
+  missedDoseStreakDays = 0,
+  hasSevereSideEffectsReported = false,
+  isHighRiskCondition = true
+} = {}) {
+  if (typeof takenDosesCount !== 'number' || takenDosesCount < 0 || isNaN(takenDosesCount)) {
+    return { valid: false, error: 'Taken doses count must be a non-negative number' };
+  }
+  if (typeof prescribedDosesCount !== 'number' || prescribedDosesCount <= 0 || isNaN(prescribedDosesCount)) {
+    return { valid: false, error: 'Prescribed doses count must be a positive number' };
+  }
+
+  const adherencePct = Math.min(100, Math.round((takenDosesCount / prescribedDosesCount) * 100 * 10) / 10);
+  let penalty = 0;
+  if (missedDoseStreakDays > 2) penalty += 15;
+  if (hasSevereSideEffectsReported) penalty += 20;
+
+  const finalAdherenceScore = Math.max(0, Math.min(100, Math.round(adherencePct - penalty)));
+
+  let adherenceTier = 'OPTIMAL_ADHERENCE';
+  if (finalAdherenceScore < 60 || missedDoseStreakDays >= 3) {
+    adherenceTier = 'NON_ADHERENT_HIGH_RISK';
+  } else if (finalAdherenceScore < 85) {
+    adherenceTier = 'MODERATE_ADHERENCE_WARNING';
+  }
+
+  return {
+    valid: true,
+    takenDosesCount,
+    prescribedDosesCount,
+    adherencePct,
+    missedDoseStreakDays,
+    hasSevereSideEffectsReported: Boolean(hasSevereSideEffectsReported),
+    isHighRiskCondition: Boolean(isHighRiskCondition),
+    finalAdherenceScore,
+    adherenceTier,
+    recommendation: adherenceTier === 'NON_ADHERENT_HIGH_RISK'
+      ? `High non-adherence risk (Score: ${finalAdherenceScore}/100, ${missedDoseStreakDays} consecutive missed days). Nurse check-in recommended.`
+      : adherenceTier === 'MODERATE_ADHERENCE_WARNING'
+      ? `Moderate adherence warning (${adherencePct}% adherence rate). Enable daily dosage push notifications.`
+      : `Optimal medication adherence achieved (${adherencePct}% rate, Score: ${finalAdherenceScore}/100).`
+  };
+}
+
 
 
 
