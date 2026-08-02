@@ -2404,6 +2404,56 @@ export function calculatePatientChronicDiseaseAdherenceScore({
   };
 }
 
+export function calculatePatientEmergencyTriageAndBedAllocationScore({
+  vitalSignsAlertLevel = 3,
+  triagePriorityLevel = 2,
+  isICURequired = false,
+  edWaitTimeMinutes = 45,
+  availableBedsCount = 4
+} = {}) {
+  if (typeof vitalSignsAlertLevel !== 'number' || vitalSignsAlertLevel < 1 || vitalSignsAlertLevel > 5) {
+    return { valid: false, error: 'Vital signs alert level must be between 1 and 5' };
+  }
+  if (typeof triagePriorityLevel !== 'number' || triagePriorityLevel < 1 || triagePriorityLevel > 5) {
+    return { valid: false, error: 'Triage priority level must be between 1 and 5' };
+  }
+  if (typeof edWaitTimeMinutes !== 'number' || edWaitTimeMinutes < 0) {
+    return { valid: false, error: 'ED wait time minutes must be a non-negative number' };
+  }
+  if (typeof availableBedsCount !== 'number' || availableBedsCount < 0) {
+    return { valid: false, error: 'Available beds count must be a non-negative number' };
+  }
+
+  let urgencyPoints = (6 - triagePriorityLevel) * 20 + vitalSignsAlertLevel * 8;
+  if (isICURequired) urgencyPoints += 25;
+  if (edWaitTimeMinutes > 60) urgencyPoints += 10;
+
+  const totalUrgencyScore = Math.min(100, Math.round(urgencyPoints));
+
+  let allocationTier = 'STABLE_WAITING_ROOM';
+  if (totalUrgencyScore >= 80 || isICURequired || triagePriorityLevel === 1) {
+    allocationTier = 'EMERGENCY_IMMEDIATE_ICU';
+  } else if (totalUrgencyScore >= 50 || availableBedsCount < 2) {
+    allocationTier = 'URGENT_BED_ALLOCATION';
+  }
+
+  return {
+    valid: true,
+    vitalSignsAlertLevel,
+    triagePriorityLevel,
+    isICURequired: Boolean(isICURequired),
+    edWaitTimeMinutes,
+    availableBedsCount,
+    totalUrgencyScore,
+    allocationTier,
+    recommendation: allocationTier === 'EMERGENCY_IMMEDIATE_ICU'
+      ? `Critical emergency status (Urgency Score: ${totalUrgencyScore}/100). Immediate resuscitation room and ICU bed transfer mandatory.`
+      : allocationTier === 'URGENT_BED_ALLOCATION'
+      ? `Urgent bed assignment required (Urgency Score: ${totalUrgencyScore}/100, ${availableBedsCount} beds available).`
+      : `Patient stable in triage waiting area (${edWaitTimeMinutes}m wait time).`
+  };
+}
+
 
 
 
