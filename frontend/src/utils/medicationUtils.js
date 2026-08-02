@@ -2317,6 +2317,48 @@ export function calculatePatientTelehealthVideoQualityScore({
   };
 }
 
+export function calculatePatientPrescriptionRefillAlertStatus({
+  currentDosesRemaining = 5,
+  dailyDoseFrequency = 2,
+  pharmacyProcessingDays = 3,
+  isControlledSubstance = false
+} = {}) {
+  if (typeof currentDosesRemaining !== 'number' || currentDosesRemaining < 0 || isNaN(currentDosesRemaining)) {
+    return { valid: false, error: 'Current doses remaining must be a non-negative number' };
+  }
+  if (typeof dailyDoseFrequency !== 'number' || dailyDoseFrequency <= 0 || isNaN(dailyDoseFrequency)) {
+    return { valid: false, error: 'Daily dose frequency must be a positive number' };
+  }
+
+  const daysSupplyRemaining = Math.round((currentDosesRemaining / dailyDoseFrequency) * 10) / 10;
+  const leadTimeDaysRequired = pharmacyProcessingDays + (isControlledSubstance ? 2 : 1);
+  const isRefillAlertNeeded = daysSupplyRemaining <= leadTimeDaysRequired;
+
+  let alertUrgencyTier = 'NORMAL_SUPPLY';
+  if (daysSupplyRemaining <= 1) {
+    alertUrgencyTier = 'CRITICAL_RUN_OUT_IMMINENT';
+  } else if (isRefillAlertNeeded) {
+    alertUrgencyTier = 'REFILL_REQUEST_DUE';
+  }
+
+  return {
+    valid: true,
+    currentDosesRemaining,
+    dailyDoseFrequency,
+    daysSupplyRemaining,
+    leadTimeDaysRequired,
+    isControlledSubstance: Boolean(isControlledSubstance),
+    isRefillAlertNeeded,
+    alertUrgencyTier,
+    recommendation: alertUrgencyTier === 'CRITICAL_RUN_OUT_IMMINENT'
+      ? `Critical medication supply! Only ${daysSupplyRemaining} days left (${currentDosesRemaining} doses). Immediate refill request sent.`
+      : alertUrgencyTier === 'REFILL_REQUEST_DUE'
+      ? `Prescription refill required (${daysSupplyRemaining} days remaining, lead time needed: ${leadTimeDaysRequired} days).`
+      : `Medication supply adequate (${daysSupplyRemaining} days remaining).`
+  };
+}
+
+
 
 
 
