@@ -6,7 +6,7 @@
   "scripts": {
     "server": "nodemon backend/server.js",
     "build": "npm --prefix frontend run build",
-    "test": "node frontend/test_supabase.js && node frontend/__tests__/medicationUtils.test.js && node frontend/__tests__/appointmentValidation.test.js"
+    "test": "node frontend/test_supabase.js && node frontend/__tests__/medicationUtils.test.js && node frontend/__tests__/appointmentValidation.test.js && node frontend/__tests__/medicationSafety.test.js"
   },
   "type": "module",
   "keywords": [],
