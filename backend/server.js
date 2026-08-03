@@ -137,6 +137,22 @@ app.post('/api/appointments', async (req, res) => {
       });
     }
 
+    // Check for existing double-booking for the same doctor at the same date & time
+    const { data: existingAppts } = await supabase
+      .from('appointments')
+      .select('id')
+      .eq('doctor_id', doctor_id)
+      .eq('appointment_date', appointment_date)
+      .eq('appointment_time', appointment_time)
+      .neq('status', 'cancelled');
+
+    if (existingAppts && existingAppts.length > 0) {
+      return res.status(409).json({
+        success: false,
+        error: 'Doctor already has an active appointment at the requested date and time slot.'
+      });
+    }
+
     const validStatuses = ['pending', 'confirmed', 'cancelled'];
     const apptStatus = status && validStatuses.includes(status) ? status : 'pending';
 
