@@ -2517,6 +2517,53 @@ export function calculatePatientMedicationAllergyCrossReactivityScore({
   };
 }
 
+export function calculateMedicationRefillAdherenceAndReminderScore({
+  totalPrescribedRefillsCount = 6,
+  onTimeRefillsCount = 5,
+  currentPillsRemaining = 12,
+  dailyDoseFrequency = 2,
+  refillLeadTimeDays = 5
+} = {}) {
+  if (typeof totalPrescribedRefillsCount !== 'number' || totalPrescribedRefillsCount <= 0) {
+    return { valid: false, error: 'Total prescribed refills count must be a positive number' };
+  }
+  if (typeof dailyDoseFrequency !== 'number' || dailyDoseFrequency <= 0) {
+    return { valid: false, error: 'Daily dose frequency must be a positive number' };
+  }
+
+  const adherenceRatePct = Math.round((Math.min(totalPrescribedRefillsCount, Math.max(0, onTimeRefillsCount)) / totalPrescribedRefillsCount) * 100);
+  const daysSupplyRemaining = Math.floor(Math.max(0, currentPillsRemaining) / dailyDoseFrequency);
+
+  const isRefillUrgent = daysSupplyRemaining <= refillLeadTimeDays;
+  const isOutofStockRisk = daysSupplyRemaining <= 2;
+
+  let adherenceTier = 'HIGH_ADHERENCE';
+  if (adherenceRatePct < 70) adherenceTier = 'LOW_ADHERENCE_WARNING';
+  else if (adherenceRatePct < 85) adherenceTier = 'MODERATE_ADHERENCE';
+
+  let alertLevel = 'NORMAL';
+  if (isOutofStockRisk) alertLevel = 'CRITICAL_REFILL_REQUIRED';
+  else if (isRefillUrgent) alertLevel = 'URGENT_REFILL_REMINDER';
+
+  return {
+    valid: true,
+    totalPrescribedRefillsCount,
+    onTimeRefillsCount,
+    adherenceRatePct,
+    daysSupplyRemaining,
+    isRefillUrgent,
+    isOutofStockRisk,
+    adherenceTier,
+    alertLevel,
+    recommendation: isOutofStockRisk
+      ? `CRITICAL REFILL ALERT: Only ${daysSupplyRemaining} days of supply remaining. Order prescription refill immediately.`
+      : isRefillUrgent
+      ? `REFILL REMINDER: ${daysSupplyRemaining} days of medication supply remaining. Reorder now to avoid missed doses.`
+      : `Medication adherence rate is optimal (${adherenceRatePct}% on-time, ${daysSupplyRemaining} days supply remaining).`
+  };
+}
+
+
 
 
 

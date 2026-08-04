@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 import test from 'node:test';
-import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore, calculateMedicationInteractionRiskScore, calculatePatientVitalSignStabilityIndex, calculatePatientAppointmentTriagePriority, calculatePatientPrescriptionRefillRiskIndex, calculatePatientPolypharmacyRiskIndex, calculatePatientReadmissionRiskScore, calculatePatientMedicationAdherenceTier, calculatePatientEmergencyRiskScore, calculatePatientAppointmentNoShowProbability, calculatePatientChronicConditionComplexityIndex, calculatePatientMedicationRefillAdherenceScore, calculatePatientMedicationStorageTemperatureSafety, calculatePatientVitalSignAnomalyAlertScore, calculatePatientLabTestResultSeverityScore, calculateTelehealthSlotOptimizationIndex, calculateTelehealthConsultationTriagingIndex, calculatePatientHealthScoreAndRiskTier, calculatePatientMedicationSideEffectRiskScore, calculatePatientPediatricDosageSafety, calculatePatientRenalDoseAdjustment, calculatePatientAnticholinergicCognitiveRiskScore, calculatePatientPolypharmacyInteractionIndex, calculatePatientGeriatricMedicationSafetyAudit, calculatePatientComprehensiveLabAlertAndRiskScore, calculatePatientChronicDiseaseMultimorbidityScore, calculatePatientCardiovascularRiskScore, calculatePatientGlycemicControlAndDiabetesRiskScore, calculatePatientHypertensionAndCardiovascularRiskScore, calculatePatientEmergencySymptomTriagingScore, calculatePatientInpatientReadmissionRiskScore, calculatePatientPerioperativeMedicationHoldAudit, calculatePatientChronicCareMonitoringIndex, calculatePatientTelehealthTriageScore, calculatePatientTelehealthVideoQualityScore, calculatePatientPrescriptionRefillAlertStatus, calculatePatientChronicDiseaseAdherenceScore, calculatePatientEmergencyTriageAndBedAllocationScore, calculatePatientMedicationAllergyCrossReactivityScore } from '../src/utils/medicationUtils.js';
+import { parseFrequencyToDailyCount, calculateMedicationDurationDays, validateDosageInput, calculateRefillDate, checkPotentialDrugInteraction, calculateAdherenceRate, generateDoseScheduleTimes, formatDosageInstructions, calculateNextMedicationReminder, calculateMedicationRefillUrgency, calculateDailyDoseComplianceScore, formatPrescriptionSummary, calculateBMIAndHealthRiskCategory, calculatePediatricDoseByWeight, calculateEstimatedOutofPocketMedicationCost, calculatePatientVitalSignsAlertLevel, calculatePatientWaterHydrationTarget, calculateMedicationAdherenceRiskScore, calculateDoctorSlotOccupancyAndAvailability, calculateEmergencyTriagePriorityLevel, calculateMedicationAdherenceRate, calculateTelehealthSlotOptimizationScore, calculateMedicationInteractionRiskScore, calculatePatientVitalSignStabilityIndex, calculatePatientAppointmentTriagePriority, calculatePatientPrescriptionRefillRiskIndex, calculatePatientPolypharmacyRiskIndex, calculatePatientReadmissionRiskScore, calculatePatientMedicationAdherenceTier, calculatePatientEmergencyRiskScore, calculatePatientAppointmentNoShowProbability, calculatePatientChronicConditionComplexityIndex, calculatePatientMedicationRefillAdherenceScore, calculatePatientMedicationStorageTemperatureSafety, calculatePatientVitalSignAnomalyAlertScore, calculatePatientLabTestResultSeverityScore, calculateTelehealthSlotOptimizationIndex, calculateTelehealthConsultationTriagingIndex, calculatePatientHealthScoreAndRiskTier, calculatePatientMedicationSideEffectRiskScore, calculatePatientPediatricDosageSafety, calculatePatientRenalDoseAdjustment, calculatePatientAnticholinergicCognitiveRiskScore, calculatePatientPolypharmacyInteractionIndex, calculatePatientGeriatricMedicationSafetyAudit, calculatePatientComprehensiveLabAlertAndRiskScore, calculatePatientChronicDiseaseMultimorbidityScore, calculatePatientCardiovascularRiskScore, calculatePatientGlycemicControlAndDiabetesRiskScore, calculatePatientHypertensionAndCardiovascularRiskScore, calculatePatientEmergencySymptomTriagingScore, calculatePatientInpatientReadmissionRiskScore, calculatePatientPerioperativeMedicationHoldAudit, calculatePatientChronicCareMonitoringIndex, calculatePatientTelehealthTriageScore, calculatePatientTelehealthVideoQualityScore, calculatePatientPrescriptionRefillAlertStatus, calculatePatientChronicDiseaseAdherenceScore, calculatePatientEmergencyTriageAndBedAllocationScore, calculatePatientMedicationAllergyCrossReactivityScore, calculateMedicationRefillAdherenceAndReminderScore } from '../src/utils/medicationUtils.js';
 
 
 
@@ -1202,6 +1202,36 @@ test('calculatePatientMedicationAllergyCrossReactivityScore', () => {
   assert.strictEqual(invalid.valid, false);
   assert.strictEqual(invalid.error, 'Known allergies list must be an array');
 });
+
+test('calculateMedicationRefillAdherenceAndReminderScore', () => {
+  const normal = calculateMedicationRefillAdherenceAndReminderScore({
+    totalPrescribedRefillsCount: 10,
+    onTimeRefillsCount: 9,
+    currentPillsRemaining: 20,
+    dailyDoseFrequency: 2
+  });
+  assert.strictEqual(normal.valid, true);
+  assert.strictEqual(normal.adherenceRatePct, 90);
+  assert.strictEqual(normal.daysSupplyRemaining, 10);
+  assert.strictEqual(normal.adherenceTier, 'HIGH_ADHERENCE');
+  assert.strictEqual(normal.alertLevel, 'NORMAL');
+
+  const urgent = calculateMedicationRefillAdherenceAndReminderScore({
+    totalPrescribedRefillsCount: 10,
+    onTimeRefillsCount: 6,
+    currentPillsRemaining: 2,
+    dailyDoseFrequency: 2
+  });
+  assert.strictEqual(urgent.valid, true);
+  assert.strictEqual(urgent.daysSupplyRemaining, 1);
+  assert.strictEqual(urgent.isOutofStockRisk, true);
+  assert.strictEqual(urgent.alertLevel, 'CRITICAL_REFILL_REQUIRED');
+
+  const invalid = calculateMedicationRefillAdherenceAndReminderScore({ totalPrescribedRefillsCount: -1 });
+  assert.strictEqual(invalid.valid, false);
+  assert.strictEqual(invalid.error, 'Total prescribed refills count must be a positive number');
+});
+
 
 
 
