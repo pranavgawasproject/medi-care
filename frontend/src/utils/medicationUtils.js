@@ -2454,6 +2454,70 @@ export function calculatePatientEmergencyTriageAndBedAllocationScore({
   };
 }
 
+export function calculatePatientMedicationAllergyCrossReactivityScore({
+  prescribedDrugClass = 'cephalosporin',
+  knownAllergiesList = ['penicillin'],
+  allergySeverity = 'MODERATE',
+  estimatedCrossReactivityPct = 10.0
+} = {}) {
+  if (!Array.isArray(knownAllergiesList)) {
+    return { valid: false, error: 'Known allergies list must be an array' };
+  }
+
+  const prescribedClass = (prescribedDrugClass || '').toLowerCase().trim();
+  const severity = (allergySeverity || 'MODERATE').toUpperCase();
+  const crossPct = typeof estimatedCrossReactivityPct === 'number' && estimatedCrossReactivityPct >= 0 ? estimatedCrossReactivityPct : 10.0;
+
+  let isDirectMatch = false;
+  let isCrossReactive = false;
+
+  for (const allergy of knownAllergiesList) {
+    const alg = (typeof allergy === 'string' ? allergy : allergy?.name || '').toLowerCase().trim();
+    if (!alg) continue;
+    if (alg === prescribedClass || prescribedClass.includes(alg) || alg.includes(prescribedClass)) {
+      isDirectMatch = true;
+    } else if (
+      (alg.includes('penicillin') && prescribedClass.includes('cephalosporin')) ||
+      (alg.includes('cephalosporin') && prescribedClass.includes('penicillin')) ||
+      (alg.includes('sulfonamide') && prescribedClass.includes('sulfa')) ||
+      (alg.includes('aspirin') && prescribedClass.includes('nsaid'))
+    ) {
+      isCrossReactive = true;
+    }
+  }
+
+  let riskScore = 0;
+  if (isDirectMatch) {
+    riskScore = 100;
+  } else if (isCrossReactive) {
+    riskScore = Math.min(90, Math.round(crossPct * 3.5 + (severity === 'ANAPHYLAXIS' ? 40 : severity === 'MODERATE' ? 20 : 10)));
+  }
+
+  let riskTier = 'SAFE_NO_ALLERGY_MATCH';
+  if (isDirectMatch || riskScore >= 80) {
+    riskTier = 'CRITICAL_DIRECT_ALLERGY_CONTRAINDICATION';
+  } else if (isCrossReactive || riskScore >= 40) {
+    riskTier = 'MODERATE_CROSS_REACTIVITY_RISK';
+  }
+
+  return {
+    valid: true,
+    prescribedDrugClass: prescribedClass,
+    knownAllergiesCount: knownAllergiesList.length,
+    isDirectMatch,
+    isCrossReactive,
+    allergySeverity: severity,
+    riskScore,
+    riskTier,
+    recommendation: riskTier === 'CRITICAL_DIRECT_ALLERGY_CONTRAINDICATION'
+      ? `CRITICAL ALLERGY CONTRAINDICATION: Direct allergy match or severe cross-reactivity for ${prescribedClass}. Do NOT administer.`
+      : riskTier === 'MODERATE_CROSS_REACTIVITY_RISK'
+      ? `WARNING: Potential cross-reactivity risk (${riskScore}/100) between ${prescribedClass} and known allergy profile. Monitor closely or consider alternative.`
+      : `No direct or cross-reactive allergy risk detected for ${prescribedClass}.`
+  };
+}
+
+
 
 
 
