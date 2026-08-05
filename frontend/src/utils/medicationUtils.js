@@ -2609,6 +2609,52 @@ export function calculatePatientAppointmentNoShowRiskScore({
   };
 }
 
+export function calculatePatientPolypharmacyDrugInteractionRisk({
+  totalActiveMedications = 3,
+  highRiskCombinationCount = 0,
+  hasRenalImpairment = false,
+  hasHepaticImpairment = false,
+  patientAge = 50
+} = {}) {
+  if (typeof totalActiveMedications !== 'number' || totalActiveMedications < 0 || isNaN(totalActiveMedications)) {
+    return { valid: false, error: 'Total active medications must be a non-negative number' };
+  }
+
+  const count = Math.max(0, totalActiveMedications);
+  const highRiskCount = Math.max(0, typeof highRiskCombinationCount === 'number' ? highRiskCombinationCount : 0);
+  const age = Math.max(0, typeof patientAge === 'number' ? patientAge : 50);
+
+  let score = 10;
+  if (count >= 5) score += 25;
+  else if (count >= 3) score += 15;
+
+  score += Math.min(40, highRiskCount * 20);
+  if (hasRenalImpairment) score += 15;
+  if (hasHepaticImpairment) score += 15;
+  if (age >= 65) score += 10;
+
+  const finalScore = Math.min(100, Math.max(0, Math.round(score)));
+
+  let riskTier = 'LOW_INTERACTION_RISK';
+  if (finalScore >= 70) riskTier = 'CRITICAL_INTERACTION_RISK';
+  else if (finalScore >= 45) riskTier = 'MODERATE_INTERACTION_RISK';
+
+  return {
+    valid: true,
+    totalActiveMedications: count,
+    highRiskCombinationCount: highRiskCount,
+    hasRenalImpairment,
+    hasHepaticImpairment,
+    patientAge: age,
+    polypharmacyRiskScore: finalScore,
+    riskTier,
+    recommendation: finalScore >= 70
+      ? `Critical polypharmacy risk (${finalScore}/100). Clinical pharmacist medication reconciliation required.`
+      : `Polypharmacy profile is within safe clinical monitoring parameters (${finalScore}/100).`
+  };
+}
+
+
 
 
 
