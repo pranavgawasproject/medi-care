@@ -2563,6 +2563,53 @@ export function calculateMedicationRefillAdherenceAndReminderScore({
   };
 }
 
+export function calculatePatientAppointmentNoShowRiskScore({
+  priorNoShowCount = 2,
+  appointmentLeadTimeDays = 14,
+  distanceToClinicMiles = 15.0,
+  hasReminderSent = true,
+  isTelehealth = false
+} = {}) {
+  if (typeof priorNoShowCount !== 'number' || priorNoShowCount < 0) {
+    return { valid: false, error: 'Prior no-show count must be a non-negative number' };
+  }
+  if (typeof appointmentLeadTimeDays !== 'number' || appointmentLeadTimeDays < 0) {
+    return { valid: false, error: 'Appointment lead time days must be a non-negative number' };
+  }
+
+  let riskScore = 15;
+  riskScore += Math.min(45, priorNoShowCount * 15);
+  if (appointmentLeadTimeDays > 21) riskScore += 20;
+  else if (appointmentLeadTimeDays > 7) riskScore += 10;
+
+  if (!isTelehealth && distanceToClinicMiles > 20) riskScore += 15;
+  if (!hasReminderSent) riskScore += 15;
+  if (isTelehealth) riskScore -= 10;
+
+  const finalRiskScore = Math.min(100, Math.max(0, Math.round(riskScore)));
+
+  let riskTier = 'LOW_NO_SHOW_RISK';
+  if (finalRiskScore >= 65) riskTier = 'HIGH_NO_SHOW_RISK';
+  else if (finalRiskScore >= 40) riskTier = 'MODERATE_NO_SHOW_RISK';
+
+  return {
+    valid: true,
+    priorNoShowCount,
+    appointmentLeadTimeDays,
+    distanceToClinicMiles,
+    hasReminderSent,
+    isTelehealth,
+    riskScore: finalRiskScore,
+    riskTier,
+    recommendation: riskTier === 'HIGH_NO_SHOW_RISK'
+      ? `High no-show risk (${finalRiskScore}/100). Send SMS/Email confirmation and consider offering telehealth option.`
+      : riskTier === 'MODERATE_NO_SHOW_RISK'
+      ? `Moderate no-show risk (${finalRiskScore}/100). Send automated appointment reminder 24h prior.`
+      : `Low no-show risk (${finalRiskScore}/100). Standard appointment scheduling confirmed.`
+  };
+}
+
+
 
 
 
