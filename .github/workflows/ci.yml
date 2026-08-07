@@ -48,3 +48,24 @@ jobs:
       - name: Build Application
         run: npm run build
         working-directory: frontend
+
+  test:
+    name: Run Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Frontend Dependencies
+        run: npm ci
+        working-directory: frontend
+
+      - name: Install Root Dependencies
+        run: npm ci
+
+      - name: Run Tests
+        run: npm test
