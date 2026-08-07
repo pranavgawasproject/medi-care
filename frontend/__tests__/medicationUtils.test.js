@@ -1157,7 +1157,7 @@ test('calculatePatientEmergencyTriageAndBedAllocationScore', () => {
     availableBedsCount: 4
   });
   assert.strictEqual(normal.valid, true);
-  assert.strictEqual(normal.totalUrgencyScore, 104 > 100 ? 100 : 104);
+  assert.strictEqual(normal.totalUrgencyScore, 100);
   assert.strictEqual(normal.allocationTier, 'EMERGENCY_IMMEDIATE_ICU');
   assert.ok(normal.recommendation.includes('Critical emergency status'));
 
