@@ -12,7 +12,6 @@ import type {
   ThHTMLAttributes,
 } from 'react'
 import { cn } from '@/lib/utils'
-import type { AppointmentStatus } from '@/lib/types'
 
 /* ---------------- Button ---------------- */
 type ButtonVariant =
@@ -136,6 +135,7 @@ const statusConfig: Record<
   string,
   { label: string; className: string; dot: string }
 > = {
+  // appointment
   confirmed: {
     label: 'Confirmed',
     className: 'bg-primary/10 text-primary border-primary/30',
@@ -156,9 +156,35 @@ const statusConfig: Record<
     className: 'bg-muted text-muted-foreground border-border',
     dot: 'bg-muted-foreground',
   },
+  // prescription
+  active: {
+    label: 'Active',
+    className: 'bg-primary/10 text-primary border-primary/30',
+    dot: 'bg-primary',
+  },
+  // lab report
+  ordered: {
+    label: 'Ordered',
+    className: 'bg-accent/10 text-accent border-accent/30',
+    dot: 'bg-accent',
+  },
+  collected: {
+    label: 'Collected',
+    className: 'bg-primary/10 text-primary border-primary/30',
+    dot: 'bg-primary',
+  },
+  in_progress: {
+    label: 'In progress',
+    className: 'bg-accent/10 text-accent border-accent/30',
+    dot: 'bg-accent',
+  },
 }
-export function StatusBadge({ status }: { status: AppointmentStatus | string }) {
-  const cfg = statusConfig[status] ?? statusConfig.pending
+export function StatusBadge({ status }: { status: string }) {
+  const cfg = statusConfig[status] ?? {
+    label: status.charAt(0).toUpperCase() + status.slice(1),
+    className: 'bg-muted text-muted-foreground border-border',
+    dot: 'bg-muted-foreground',
+  }
   return (
     <Badge className={cfg.className}>
       <span className={cn('h-1.5 w-1.5 rounded-full', cfg.dot)} />
@@ -380,3 +406,20 @@ export function EcgDivider({
     </svg>
   )
 }
+
+/* ---------------- Textarea ---------------- */
+export const Textarea = forwardRef<
+  HTMLTextAreaElement,
+  React.TextareaHTMLAttributes<HTMLTextAreaElement>
+>(function Textarea({ className, ...props }, ref) {
+  return (
+    <textarea
+      ref={ref}
+      className={cn(
+        'flex min-h-[80px] w-full rounded-md border border-border bg-input/30 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/60 outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary resize-y',
+        className
+      )}
+      {...props}
+    />
+  )
+})

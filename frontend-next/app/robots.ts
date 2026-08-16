@@ -1,14 +1,8 @@
 import type { MetadataRoute } from 'next'
 
-const SITE_URL = 'https://medicare-pranav.vercel.app/'
-
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: {
-      userAgent: '*',
-      allow: '/',
-    },
-    sitemap: `${SITE_URL}sitemap.xml`,
-    host: SITE_URL,
+    rules: { userAgent: '*', allow: '/', disallow: ['/patient', '/doctor', '/admin', '/notifications', '/settings', '/api'] },
+    sitemap: 'https://medicare-pranav.vercel.app/sitemap.xml',
   }
 }

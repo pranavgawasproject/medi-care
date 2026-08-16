@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Space_Grotesk, Inter, IBM_Plex_Mono } from 'next/font/google'
 import './globals.css'
+import { Providers } from '@/components/Providers'
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
@@ -25,15 +26,20 @@ const SITE_URL = 'https://medicare-pranav.vercel.app/'
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: 'MediCare — Smart Healthcare Management Platform',
+  title: {
+    default: 'MediCare — Smart Healthcare Management Platform',
+    template: '%s · MediCare',
+  },
   description:
-    'MediCare is a modern clinic operations platform connecting patients, practitioners, and administrators. Book consultations, manage medical notes, and streamline clinic workflows.',
+    'MediCare is an enterprise healthcare platform connecting patients, practitioners, and administrators. Book consultations, manage prescriptions, lab reports, medical records, and clinic workflows.',
   applicationName: 'MediCare',
   keywords: [
     'medicare',
     'clinic management',
     'patient booking',
-    'medical notes',
+    'medical records',
+    'prescriptions',
+    'lab reports',
     'healthcare software',
     'clinic operations',
     'appointment scheduling',
@@ -60,22 +66,15 @@ export const metadata: Metadata = {
     siteName: 'MediCare',
     title: 'MediCare — Smart Healthcare Management Platform',
     description:
-      'MediCare is a modern clinic operations platform connecting patients, practitioners, and administrators. Book consultations, manage medical notes, and streamline clinic workflows.',
+      'Enterprise healthcare platform connecting patients, practitioners, and administrators.',
     locale: 'en_US',
-    images: [
-      {
-        url: '/vite.svg',
-        width: 64,
-        height: 64,
-        alt: 'MediCare logo',
-      },
-    ],
+    images: [{ url: '/vite.svg', width: 64, height: 64, alt: 'MediCare logo' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'MediCare — Smart Healthcare Management Platform',
     description:
-      'MediCare is a modern clinic operations platform connecting patients, practitioners, and administrators. Book consultations, manage medical notes, and streamline clinic workflows.',
+      'Enterprise healthcare platform connecting patients, practitioners, and administrators.',
     images: ['/vite.svg'],
   },
   category: 'HealthApplication',
@@ -98,10 +97,7 @@ const jsonLd = {
       url: SITE_URL,
       description:
         'Modern clinic operations platform for booking consultations and managing medical notes.',
-      publisher: {
-        '@type': 'Organization',
-        name: 'MediCare',
-      },
+      publisher: { '@type': 'Organization', name: 'MediCare' },
     },
     {
       '@type': 'SoftwareApplication',
@@ -109,13 +105,9 @@ const jsonLd = {
       applicationCategory: 'HealthApplication',
       operatingSystem: 'Web',
       description:
-        'A modern clinic operations platform connecting patients, practitioners, and administrators for booking consultations and managing medical notes.',
+        'A modern clinic operations platform connecting patients, practitioners, and administrators for booking consultations, managing prescriptions, lab reports, and medical records.',
       url: SITE_URL,
-      offers: {
-        '@type': 'Offer',
-        price: '0',
-        priceCurrency: 'USD',
-      },
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
     },
   ],
 }
@@ -130,7 +122,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="antialiased">
-        {children}
+        <Providers>{children}</Providers>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

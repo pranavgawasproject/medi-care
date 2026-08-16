@@ -4,11 +4,8 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 /**
  * Browser-side Supabase client for Client Components.
  *
- * Returns null when env vars are not configured so calling code can fall back
- * to seed data instead of making failed network requests.
- *
- * Mirrors the Vite source's `src/supabaseClient.js` pattern but using
- * `@supabase/ssr` instead of the raw `@supabase/supabase-js` createClient.
+ * Returns `null` when env vars are missing so calling code can surface a
+ * "Configuration error" UI. NEVER falls back to seed data.
  */
 export function createClient(): SupabaseClient | null {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -22,11 +19,6 @@ export function createClient(): SupabaseClient | null {
     auth: {
       persistSession: true,
       autoRefreshToken: true,
-    },
-    realtime: {
-      params: {
-        eventsPerSecond: 10,
-      },
     },
     global: {
       headers: { 'x-my-custom-header': 'medi-care' },

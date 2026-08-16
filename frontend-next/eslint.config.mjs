@@ -18,21 +18,12 @@ const eslintConfig = [
       "out/**",
       "build/**",
       "next-env.d.ts",
-      // Vestigial utility modules ported verbatim from the Vite/JS source.
-      // They are not consumed by the UI yet and contain large amounts of
-      // untyped JS code that would require a full rewrite to pass strict
-      // ESLint. Ignored until the team has bandwidth to type them properly.
-      "lib/utils/medicationUtils.ts",
-      "lib/utils/triagePriorityEngine.ts",
-      "lib/utils/medicationSafety.ts",
-      "lib/utils/insuranceBillingUtils.ts",
     ],
   },
   {
     rules: {
       // Allow underscore-prefixed parameters/variables to mark intentional
-      // unused API-contract props (e.g. a parent passes `connected` for the
-      // header badge but a child component doesn't need it).
+      // unused API-contract props.
       "@typescript-eslint/no-unused-vars": [
         "warn",
         {
