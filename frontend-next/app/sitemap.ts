@@ -2,9 +2,10 @@ import type { MetadataRoute } from 'next'
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = 'https://medicare-pranav.vercel.app'
+  const lastModified = new Date('2026-08-17')
   return [
-    { url: `${base}/`, lastModified: new Date(), changeFrequency: 'weekly', priority: 1.0 },
-    { url: `${base}/login`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
-    { url: `${base}/signup`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${base}/`, lastModified, changeFrequency: 'weekly', priority: 1.0 },
+    { url: `${base}/login`, lastModified, changeFrequency: 'monthly', priority: 0.5 },
+    { url: `${base}/signup`, lastModified, changeFrequency: 'monthly', priority: 0.5 },
   ]
 }
