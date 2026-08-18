@@ -93,6 +93,14 @@ const jsonLd = {
         'Clinic operations platform connecting patients, practitioners, and administrators.',
     },
     {
+      '@type': 'MedicalOrganization',
+      name: 'MediCare',
+      url: SITE_URL,
+      description:
+        'Clinic operations platform for booking consultations, managing medical notes, prescriptions, and lab reports.',
+      medicalSpecialty: 'GeneralPractice',
+    },
+    {
       '@type': 'WebSite',
       name: 'MediCare',
       url: SITE_URL,
