@@ -2,7 +2,20 @@ import type { MetadataRoute } from 'next'
 
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: { userAgent: '*', allow: '/', disallow: ['/patient', '/doctor', '/admin', '/notifications', '/settings', '/api'] },
+    rules: {
+      userAgent: '*',
+      allow: '/',
+      disallow: [
+        '/patient',
+        '/doctor',
+        '/admin',
+        '/notifications',
+        '/settings',
+        '/api',
+        '/auth',
+        '/(app)',
+      ],
+    },
     sitemap: 'https://medicare-pranav.vercel.app/sitemap.xml',
   }
 }
