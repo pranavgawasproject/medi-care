@@ -5,7 +5,7 @@ node_modules
 dist
 dist-ssr
 *.local
-
-# Dev logs
+.next
 *.log
 vite-dev.log
+.DS_Store
