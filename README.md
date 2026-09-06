@@ -7,6 +7,13 @@
 [![Express](https://img.shields.io/badge/Express-Backend-000)](https://expressjs.com)
 [![React](https://img.shields.io/badge/React-Frontend-61DAFB)](https://react.dev)
 
+
+## 📸 Screenshots
+
+![MediCare landing](docs/screenshot-home.jpg)
+
+> Live demo: https://medicare-pranav.vercel.app
+
 ## ✨ Features
 
 - 👨‍⚕️ **Doctor Management** — profiles, specialties, availability
