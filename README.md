@@ -1,103 +1,72 @@
-# 🏥 Medi-Care
+# MediCare
 
-> A healthcare appointment & patient management platform — schedule consultations, manage doctors & patients, and streamline clinic operations.
+[![Live demo](https://img.shields.io/badge/Live%20demo-medicare--pranav.vercel.app-2f6655?style=for-the-badge&logo=vercel)](https://medicare-pranav.vercel.app/)
+[![Supabase](https://img.shields.io/badge/Supabase-data%20layer-3ECF8E?style=for-the-badge&logo=supabase)](https://supabase.com/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-2f6655.svg?style=for-the-badge)](LICENSE)
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Supabase](https://img.shields.io/badge/Supabase-Database-3ECF8E)](https://supabase.com)
-[![Express](https://img.shields.io/badge/Express-Backend-000)](https://expressjs.com)
-[![React](https://img.shields.io/badge/React-Frontend-61DAFB)](https://react.dev)
+> A focused healthcare operations workspace for appointments, prescriptions, patient records, and clinic administration.
 
+**[Open the live demo →](https://medicare-pranav.vercel.app/)**
 
-## 📸 Screenshots
+## Overview
 
-![MediCare landing](docs/screenshot-home.jpg)
+MediCare gives patients, practitioners, and clinic administrators a shared place to manage the patient journey. The current application is a **Next.js 15 App Router** project in `frontend-next/`, backed by Supabase and organized around server-rendered data, role-aware client views, and API routes inside the Next.js app.
 
-> Live demo: https://medicare-pranav.vercel.app
+If Supabase is not configured, the app runs in demo mode with bundled seed data so the interface can still be explored locally. Live authentication, persistence, realtime updates, and mutations require a Supabase project.
 
-## ✨ Features
+## Screenshots / Demo
 
-- 👨‍⚕️ **Doctor Management** — profiles, specialties, availability
-- 🧑‍🤝‍🧑 **Patient Records** — registration, history, contact info
-- 📅 **Appointment Scheduling** — book, reschedule, and track visits
-- ⏰ **Schedule Management** — weekly availability templates
-- 🔐 **Auth & Sessions** — protected routes, JWT
-- 🩺 **Supabase Tables** — `doctors`, `patients`, `appointments`, `schedules`
-- 🎨 **Redesigned UI** — modern teal/emerald theme with three role-based views (Patient / Doctor / Admin)
+![MediCare landing page](docs/screenshot-home.jpg)
 
-## 🛠️ Tech Stack
+The landing experience introduces the three workflows. Try the deployed build at **[medicare-pranav.vercel.app](https://medicare-pranav.vercel.app/)**.
 
-**Frontend:** React 18, Vite 5, Tailwind CSS 4, Framer Motion, Recharts, lucide-react, date-fns
-**Backend:** Node.js, Express, Supabase PostgreSQL
+## Features
 
-## 📁 Project Structure
+- **Patient view** — book and manage appointments, review prescriptions, and access medical history.
+- **Doctor view** — review patient information, manage consultation requests, and maintain availability.
+- **Admin view** — oversee practitioners, appointments, user access, and clinic-level activity.
+- **Appointment operations** — scheduling, status changes, reminders, and role-appropriate actions.
+- **Clinical records** — structured prescriptions, lab reports, and medical records.
+- **Supabase integration** — server/browser clients, normalized records, and realtime updates for supported workflows.
+- **Public healthcare utilities** — the home experience, ESI triage, safety checker, and FAQ remain browseable in demo mode.
 
-```
-.
-├── backend/
-│   ├── db/                 # Supabase client connection
-│   └── server.js
-└── frontend/               # React app (Vite)
-    └── src/
-        ├── components/     # Header, Footer, PatientView, DoctorView, AdminView, ui primitives
-        ├── data/           # seed.js — fallback mock data (mirrors Supabase schema)
-        ├── hooks/          # useToast
-        ├── lib/            # utils (cn helper)
-        ├── App.jsx         # shell with view switching + Supabase wiring
-        ├── index.css       # Tailwind 4 theme tokens (teal/emerald, dark)
-        └── supabaseClient.js
-```
+## Tech stack
 
-## 🚀 Getting Started
+- **Framework:** Next.js 15.5 (App Router and React Server Components)
+- **Language:** TypeScript and React 19
+- **Styling:** Tailwind CSS 4 with custom design tokens
+- **Data and auth:** Supabase via `@supabase/ssr` and `@supabase/supabase-js`
+- **UI:** Framer Motion, Recharts, Lucide React, React Hook Form, and Zod
+- **Architecture:** Server-rendered homepage, client role views, and API routes under `frontend-next/app/api/`
+- **Deployment:** Vercel
 
-### 1. Backend (optional — the frontend works in demo mode without it)
+## Setup
 
-```bash
-# From the root directory
-npm install
-cp .env.example .env   # configure with your Supabase keys
-npm run server
-```
+The active application is in `frontend-next/`. Clone the repository, change into that directory, install dependencies, copy the root env example to `.env.local`, and start the Next.js development script. Open http://localhost:3000 when ready.
 
-### 2. Frontend
+For production, use the included lint, build, and start scripts from `frontend-next/`.
 
-```bash
-cd frontend
-npm install
-cp .env.example .env   # optional — only needed for live Supabase data
-npm run dev
-```
+## Environment variables
 
-The app runs on http://localhost:5173.
+Copy the root [`.env.example`](.env.example) to `frontend-next/.env.local`:
 
-### 3. Supabase setup (optional)
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL` | For live data | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | For live data | Supabase anonymous/public key |
+| `NEXT_PUBLIC_SITE_URL` | Recommended | Canonical origin used by sitemap, robots, and Open Graph metadata |
+| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Optional | Google Analytics 4 measurement ID |
 
-Run `supabase_schema.sql` in your Supabase SQL editor to create the tables and
-seed data. Then set the following in `frontend/.env`:
+Without the two Supabase variables, the app uses fallback seed data and skips live persistence/realtime behavior. Do not expose a service-role key to the Next.js app.
 
-```
-VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=your-anon-key
-```
+## Deploy
 
-> **Demo mode:** If Supabase env vars are not configured, the frontend
-> automatically falls back to bundled mock data (in `src/data/seed.js`) so the
-> UI is always previewable. The header shows a "Demo mode" indicator, and
-> switches to "Connected to Supabase" once valid data is returned.
+Deploy `frontend-next/` to Vercel and set it as the project root directory. Add the Supabase variables and canonical site URL in the Vercel environment settings, then use the standard project build script; Vercel manages the start process for you.
 
-## 🎨 The Redesign
+## Contributing
 
-The frontend UI was completely redesigned with a modern healthcare aesthetic:
+Please open an issue for substantial product or schema changes first. Keep role and data-access changes scoped, avoid committing secrets, and run the linter plus production build from `frontend-next/` before opening a pull request.
 
-- **Three role views** (Patient / Doctor / Admin) with an animated pill switcher
-- **Teal/emerald palette** on a dark glassmorphism background
-- **Patient view** — gradient hero, upcoming bookings, medical notes, full booking flow, consultations history
-- **Doctor view** — profile header, stat cards, pending-request approvals, weekly schedule, consultation table
-- **Admin view** — KPI cards, weekly bookings area chart, onboard-doctor form, practitioner roster, searchable appointment log
-- **Fully responsive** (mobile-first) with toast notifications and Framer Motion transitions
+## License
 
-The backend and Supabase schema are unchanged — the redesign is a drop-in
-replacement for the frontend.
-
-## 📜 License
-
-[MIT](LICENSE) © 2026 Pranav Gawas
+MIT. See [LICENSE](LICENSE).
